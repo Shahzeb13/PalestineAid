@@ -118,11 +118,11 @@ exports.logout = (req , res) => {
 //--------------------sendVerificationOpt-------------------------
 exports.sendOtp = async (req, res) => {
   try{
-        const { email } = req.body;
+        const { userId } = req.body;
 
-  if (!email) return res.status(400).json({ message: 'Email is required.' });
+//   if (!email) return res.status(400).json({ message: 'Email is required.' });
 
-  const user = await userModel.findOne({ email });
+  const user = await userModel.findById(userId);
 
   if(!user){
         return res.status(404).json({success : false , message : "User Not Found"})
@@ -137,7 +137,7 @@ exports.sendOtp = async (req, res) => {
 
 
     user.verifyOtp = otp;
-    user.verfiyOtpExpiresAt = expiresAt;
+    user.verifyOtpExpiresAt = expiresAt;
     await user.save();
 
     const mailOptions = {
@@ -152,7 +152,7 @@ exports.sendOtp = async (req, res) => {
     await transporter.sendMail(mailOptions)
 
 
-   return res.staus(200).json({success: true , message: "Otp Sent Successfully"});
+   return res.status(200).json({success: true , message: "Otp Sent Successfully"});
 
    
 
@@ -167,18 +167,18 @@ exports.sendOtp = async (req, res) => {
 //------------------------------------verifyEmail---------------------------------------
 
 const verifyEmail = async (req , res) => {
-    const {email , otp } = req.body;
+    const {userId , otp } = req.body;
 
    
 
-    if(!email || !otp){
+    if(!userId || !otp){
         return res.status(400).json({success: false , message : "Missing Details"})
     }
 
 
 
     try{
-        const user = await userModel.findOne({email});
+        const user = await userModel.findById(userId);
         
         if(!user){
         return res.status(404).json({success : false , message : "User Not Found"})
@@ -188,7 +188,7 @@ const verifyEmail = async (req , res) => {
         return res.status(400).json({success  : false , message : "Invalid OTP"})
         }
 
-        if (new Date() > new Date(user.otpExpiresAt)) {
+        if (new Date() > new Date(user.verfiyOtpExpiresAt)) {
         return res.status(400).json({ message: "OTP has expired" });
         }
 
@@ -197,7 +197,7 @@ const verifyEmail = async (req , res) => {
         user.verifyOtp = "";
         user.verfiyOtpExpiresAt = ""
 
-        user.save();
+        await user.save();
 
         return res.status(200).json({success : true , message: "Email has been verified Successfully"});
 
