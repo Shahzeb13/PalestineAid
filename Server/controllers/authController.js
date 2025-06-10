@@ -18,7 +18,7 @@ exports.registerUser = async (req , res ) => {
     try{
         const existingUser = await userModel.findOne({email});
         if(existingUser){
-            return res.status(400).json({success: false , message : 'Email already Exists'});
+            return res.status(409).json({success: false , message : 'Email already Exists'});
         }
         const hashedPassword = await bcryptjs.hash(password , 10);
         const user = new userModel({name , email , password : hashedPassword})
@@ -164,9 +164,9 @@ exports.sendOtp = async (req, res) => {
 
 
 
-//------------------------------------verifyEmail---------------------------------------
+//------------------------------------verifyOTP---------------------------------------
 
-const verifyEmail = async (req , res) => {
+const verifyOTP = async (req , res) => {
     const {userId , otp } = req.body;
 
    
@@ -188,7 +188,7 @@ const verifyEmail = async (req , res) => {
         return res.status(400).json({success  : false , message : "Invalid OTP"})
         }
 
-        if (new Date() > new Date(user.verfiyOtpExpiresAt)) {
+        if (new Date() > new Date(user.verifyOtpExpiresAt)) {
         return res.status(400).json({ message: "OTP has expired" });
         }
 
@@ -199,7 +199,7 @@ const verifyEmail = async (req , res) => {
 
         await user.save();
 
-        return res.status(200).json({success : true , message: "Email has been verified Successfully"});
+        return res.status(200).json({success : true , message: "User has been verified Successfully"});
 
 
 }

@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 require('dotenv').config();
-const login = require("./routes/login.js");
+const loginRouter = require("./routes/login.js");
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
@@ -20,7 +20,7 @@ app.use(cors({credentials : true}));
 
 
 
-app.use('/api/auth' , login)
+app.use('/api/auth' , loginRouter)
 
 app.get('/' , (req , res) => {
     res.send('<h2>Welcome to the Home</h2>')
