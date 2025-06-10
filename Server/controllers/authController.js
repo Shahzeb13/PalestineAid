@@ -119,7 +119,7 @@ exports.logout = (req , res) => {
 exports.sendOtp = async (req, res) => {
   try{
         const { userId } = req.body;
-
+        // console.log(req.body);
 //   if (!email) return res.status(400).json({ message: 'Email is required.' });
 
   const user = await userModel.findById(userId);
@@ -133,8 +133,8 @@ exports.sendOtp = async (req, res) => {
   }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
+    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
+   
 
     user.verifyOtp = otp;
     user.verifyOtpExpiresAt = expiresAt;
@@ -144,12 +144,13 @@ exports.sendOtp = async (req, res) => {
         from : process.env.USER,
         to : user.email,
         subject: "Account Verification OTP",
-        text: `Account Verification OPT :${otp}; `
+        text: `Account Verification OTP :${otp}; `
     }
 
 
 
-    await transporter.sendMail(mailOptions)
+    const transporter = await createTransporter();
+    await transporter.sendMail(mailOptions);
 
 
    return res.status(200).json({success: true , message: "Otp Sent Successfully"});
@@ -166,7 +167,7 @@ exports.sendOtp = async (req, res) => {
 
 //------------------------------------verifyOTP---------------------------------------
 
-const verifyOTP = async (req , res) => {
+exports.verifyOTP = async (req , res) => {
     const {userId , otp } = req.body;
 
    
@@ -195,7 +196,7 @@ const verifyOTP = async (req , res) => {
 
         user.isAccountVerified = true;
         user.verifyOtp = "";
-        user.verfiyOtpExpiresAt = ""
+        user.verifyOtpExpiresAt = ""
 
         await user.save();
 
