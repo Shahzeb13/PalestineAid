@@ -115,7 +115,7 @@ exports.logout = (req , res) => {
     return res.status(200).json({success:true  , message: 'Logout Successfull'})
 }
 
-//--------------------sendVerificationOpt-------------------------
+//--------------------sendVerificationOtp-------------------------
 exports.sendOtp = async (req, res) => {
   try{
         const { userId } = req.body;
@@ -211,3 +211,117 @@ exports.verifyOTP = async (req , res) => {
 
   
 }
+
+
+// -----------------------IsAuthenticated------------------------------------
+
+exports.isAuthenticated = async (req , res) => { 
+try{
+    return res.status(200).json({success: true})
+}
+catch(err){
+    return res.status(500).json({success : true , message : err.message});
+}
+
+
+
+}
+
+//-----------------------------------sentResetPasswordOtp---------------------------
+exports.sentResetPasswordOtp = async (req ,res) => {
+
+
+    const {email} = req.body;
+
+    if(!email){
+        return res.status(400).json({success: false , message : "Missing Email "})
+    }
+
+    try{
+        
+
+
+    const user = await userModel.findOne({email});
+
+    if(!user){
+        return res.status(404).json({success: false , message: "User Not Found"})
+    }
+
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+ // 5 minutes
+
+
+        user.resetOtp = otp;
+        user.resetOtpExpiresAt = expiresAt;
+
+
+        await user.save();
+
+        const transporter = await createTransporter();
+        const mailOptions = {
+            from : process.env.USER,
+            to : user.email,
+            subject : "Password Reset OTP",
+            text: `Use this OTP to reset your password: ${otp}. It will expire in 5 minutes.`,
+            }
+
+            await transporter.sendMail(mailOptions);
+
+            return res.status(200).json({success : true , message: "Otp sent Successfully"})
+    }
+
+    catch(err){
+         return res.status(500).json({success : true , message : err.message});
+    }
+    
+}
+
+
+
+//...............................Reset password--------------------------------------
+exports.resetPassword =async (req , res) => {
+
+    const { otp , email , newPassword} = req.body;
+    // console.log(`OTP : ${otp} | Email : ${email} | NewPassword : ${newPassword}`)
+    if(!otp || !email || !newPassword){
+        return res.status(400).json({success : false , message : "Required Field is missing"})
+    }
+
+
+    try{
+        
+    
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+            return res.status(400).json({ success: false, message: "User Not Found" });
+        }
+
+
+        
+        if (user.resetOtp = ""  || user.resetOtp !== otp) {
+            return res.status(400).json({ success: false, message: "Incorrect OTP" });
+        }
+
+
+         if (user.resetOtpExpiresAt < new Date()) {
+            return res.status(400).json({ success: false, message: "OTP has expired" });
+        }
+         const hashedPassword = await bcryptjs.hash(newPassword, 10);
+
+
+          user.password = hashedPassword;
+            user.resetOtp = "";
+        user.resetOtpExpiresAt = 0;
+        await user.save();
+
+        return res.status(200).json({ success: true, message: "Password reset successfully" })
+    }
+    
+    catch(err){
+        return res.status(500).json({success : true , message : err.message});
+    }
+}
+
