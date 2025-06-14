@@ -59,7 +59,7 @@ exports.registerUser = async (req , res ) => {
 //----------------------------Login-----------------------------
 exports.login = async (req , res) => {
      const {email , password} = req.body;
-    console.log(`Email : ${email} , Password : ${password}`)
+    // console.log(`Email : ${email} , Password : ${password}`)
      if(!email || !password){
         return res.status(400).json({success: false , message: 'Missing Email or Password'
         })
