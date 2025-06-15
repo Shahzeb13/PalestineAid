@@ -10,16 +10,25 @@ import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
-    <div className="bg-gradient-to-r from-dimblue to-dimwhite w-full min-h-screen">
-      <Routes>
+    <>
+    <Routes>
         <Route path = "/" element = {< Navigate to="/register" />} />
         <Route path = "/register"  element= {<Register />}  />
         <Route path = "/login"  element= {<Login />}  /> 
         <Route path = "/dashboard"  element = {<Dashboard />} />
       </Routes>
 
-      <ToastContainer position="top-right" autoClose={3000} />
-    </div>
+      <ToastContainer position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+         />
+      </>
+      
   );
 }
 

@@ -1,0 +1,39 @@
+header{
+    background-color: #EAEFEF;
+
+}
+
+.navbar{
+    width:100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:1.5rem 4rem
+    
+}
+
+.logo a{
+    font-size: 1rem;
+    font-weight: bold;
+    color:black;
+    text-decoration: none;
+}
+
+.navbar-links{
+    /* background-color: red; */
+    display: flex;
+    gap:2rem;
+    list-style:none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition:  color 0.3s ease;
+    
+}
+
+.navbar-links a{
+    text-decoration: none;
+    color:black
+}
+.navbar-links a:hover{
+    color:#007bff
+}
