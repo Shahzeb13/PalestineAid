@@ -25,7 +25,9 @@ exports.registerUser = async (req , res ) => {
         await user.save();
 
         const token = jwt.sign({id : user._id} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
-
+        if(!token){
+            res.status(400).json({success: false , message : " Token Generation Failed"} )
+        }
         res.cookie('token' , token , {
             httpOnly : true,
             maxAge : 3600000,
@@ -89,8 +91,8 @@ exports.login = async (req , res) => {
             httpOnly : true,
             maxAge : 3600000,
             secure : process.env.NODE_ENV === 'production',
-            sameSite : process.env.NODE_ENV === 'production' ? 'none' : 'strict'
-
+            sameSite : process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+            path : "/"
         })
 
         return res.status(200).json({success : true , message : 'Login Successful'})
@@ -106,13 +108,22 @@ exports.login = async (req , res) => {
 
 //--------------------Logout-----------------------------------
 exports.logout = (req , res) => {
-    res.clearCookie('token' , {
+
+    try{
+        res.clearCookie('token' , {
         httpOnly: true,
         secure : process.env.NODE_ENV === 'production',
-        sameSite : process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+        sameSite : process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+        path : "/"
     })
 
-    return res.status(200).json({success:true  , message: 'Logout Successfull'})
+    return res.status(200).json({success:true  , message: 'Logout Successfuly'})
+    }
+    catch(err)
+    {
+        return res.status(500).json({success :false , message :err.message})
+    }
+    
 }
 
 //--------------------sendVerificationOtp-------------------------
