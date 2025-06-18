@@ -10,10 +10,155 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  // Validation functions
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const errors = [];
+    let strength = 0;
+    
+    if (password.length >= 8) {
+      strength += 1;
+    } else {
+      errors.push("At least 8 characters");
+    }
+    
+    if (/[A-Z]/.test(password)) {
+      strength += 1;
+    } else {
+      errors.push("One uppercase letter");
+    }
+    
+    if (/[a-z]/.test(password)) {
+      strength += 1;
+    } else {
+      errors.push("One lowercase letter");
+    }
+    
+    if (/\d/.test(password)) {
+      strength += 1;
+    } else {
+      errors.push("One number");
+    }
+    
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      strength += 1;
+    } else {
+      errors.push("One special character");
+    }
+    
+    return { errors, strength };
+  };
+
+  const validateName = (name) => {
+    const errors = [];
+    
+    if (name.length < 2) {
+      errors.push("At least 2 characters");
+    }
+    
+    if (name.length > 50) {
+      errors.push("Less than 50 characters");
+    }
+    
+    if (!/^[a-zA-Z\s]+$/.test(name)) {
+      errors.push("Letters and spaces only");
+    }
+    
+    return errors;
+  };
+
+  // Handle input changes with validation
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    setName(value);
+    
+    if (value) {
+      const nameErrors = validateName(value);
+      setErrors(prev => ({
+        ...prev,
+        name: nameErrors.length > 0 ? nameErrors : null
+      }));
+    } else {
+      setErrors(prev => ({ ...prev, name: null }));
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    
+    if (value) {
+      if (!validateEmail(value)) {
+        setErrors(prev => ({
+          ...prev,
+          email: "Please enter a valid email address"
+        }));
+      } else {
+        setErrors(prev => ({ ...prev, email: null }));
+      }
+    } else {
+      setErrors(prev => ({ ...prev, email: null }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    
+    if (value) {
+      const { errors: passwordErrors, strength } = validatePassword(value);
+      setPasswordStrength(strength);
+      setErrors(prev => ({
+        ...prev,
+        password: passwordErrors.length > 0 ? passwordErrors : null
+      }));
+    } else {
+      setPasswordStrength(0);
+      setErrors(prev => ({ ...prev, password: null }));
+    }
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 2) return "#ef4444";
+    if (passwordStrength <= 3) return "#f59e0b";
+    if (passwordStrength <= 4) return "#3b82f6";
+    return "#10b981";
+  };
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength <= 2) return "Weak";
+    if (passwordStrength <= 3) return "Fair";
+    if (passwordStrength <= 4) return "Good";
+    return "Strong";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Final validation before submission
+    const nameErrors = validateName(name);
+    const emailValid = validateEmail(email);
+    const { errors: passwordErrors } = validatePassword(password);
+    
+    const finalErrors = {};
+    if (nameErrors.length > 0) finalErrors.name = nameErrors;
+    if (!emailValid) finalErrors.email = "Please enter a valid email address";
+    if (passwordErrors.length > 0) finalErrors.password = passwordErrors;
+    
+    if (Object.keys(finalErrors).length > 0) {
+      setErrors(finalErrors);
+      setIsLoading(false);
+      toast.error("Please fix the validation errors");
+      return;
+    }
     
     try {
       const response = await axios.post(
@@ -22,20 +167,24 @@ const Register = () => {
         { withCredentials: true }
       );
 
-      if (!response) {
-        console.error("Response Object not found");
-        return;
-      }
       const message = response.data.message;
       toast.success(message);
 
       setName("");
       setPassword("");
       setEmail("");
+      setErrors({});
+      setPasswordStrength(0);
       navigate('/dashboard');
     } catch (err) {
-      const errMsg = err.response?.data?.message || "Registration failed";
-      toast.error(errMsg);
+      const errorData = err.response?.data;
+      if (errorData?.errors) {
+        setErrors(errorData.errors);
+        toast.error(errorData.message);
+      } else {
+        const errMsg = errorData?.message || "Registration failed";
+        toast.error(errMsg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -72,11 +221,18 @@ const Register = () => {
                 name="name"
                 placeholder="Enter your full name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="form-input"
+                onChange={handleNameChange}
+                className={`form-input ${errors.name ? 'error' : ''}`}
                 required
               />
             </div>
+            {errors.name && (
+              <div className="error-message">
+                {Array.isArray(errors.name) ? errors.name.map((err, index) => (
+                  <div key={index}>• {err}</div>
+                )) : errors.name}
+              </div>
+            )}
           </div>
 
           <div className="form-group">
@@ -89,11 +245,14 @@ const Register = () => {
                 name="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="form-input"
+                onChange={handleEmailChange}
+                className={`form-input ${errors.email ? 'error' : ''}`}
                 required
               />
             </div>
+            {errors.email && (
+              <div className="error-message">{errors.email}</div>
+            )}
           </div>
 
           <div className="form-group">
@@ -106,11 +265,37 @@ const Register = () => {
                 name="password"
                 placeholder="Create a strong password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="form-input"
+                onChange={handlePasswordChange}
+                className={`form-input ${errors.password ? 'error' : ''}`}
                 required
               />
             </div>
+            
+            {/* Password Strength Indicator */}
+            {password && (
+              <div className="password-strength">
+                <div className="strength-bar">
+                  <div 
+                    className="strength-fill"
+                    style={{ 
+                      width: `${(passwordStrength / 5) * 100}%`,
+                      backgroundColor: getPasswordStrengthColor()
+                    }}
+                  ></div>
+                </div>
+                <span className="strength-text" style={{ color: getPasswordStrengthColor() }}>
+                  {getPasswordStrengthText()}
+                </span>
+              </div>
+            )}
+            
+            {errors.password && (
+              <div className="error-message">
+                {Array.isArray(errors.password) ? errors.password.map((err, index) => (
+                  <div key={index}>• {err}</div>
+                )) : errors.password}
+              </div>
+            )}
           </div>
 
           <button

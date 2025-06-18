@@ -3,57 +3,182 @@ const bcryptjs = require("bcryptjs")
 const userModel = require('../models/userModel.js')
 const createTransporter = require("../config/nodeMailer.js")
 const nodeMailer = require("nodemailer")
+
+// Validation functions
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePassword = (password) => {
+  const errors = [];
+  
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters long");
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must contain at least one uppercase letter");
+  }
+  
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must contain at least one lowercase letter");
+  }
+  
+  if (!/\d/.test(password)) {
+    errors.push("Password must contain at least one number");
+  }
+  
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    errors.push("Password must contain at least one special character (!@#$%^&*)");
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors: errors
+  };
+};
+
+const validateName = (name) => {
+  const errors = [];
+  
+  if (name.length < 2) {
+    errors.push("Name must be at least 2 characters long");
+  }
+  
+  if (name.length > 50) {
+    errors.push("Name must be less than 50 characters");
+  }
+  
+  if (!/^[a-zA-Z\s]+$/.test(name)) {
+    errors.push("Name can only contain letters and spaces");
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors: errors
+  };
+};
+
 // ---------------------Register------------------------
 exports.registerUser = async (req , res ) => {
    
     const { name , email , password } = req.body;
 
-
+    // Check for missing fields
     if(!name || !email||  !password){
-        res.status(400).json({success: false , message: "Missing required fields"});
-
+        return res.status(400).json({
+            success: false, 
+            message: "Missing required fields",
+            errors: {
+                name: !name ? "Name is required" : null,
+                email: !email ? "Email is required" : null,
+                password: !password ? "Password is required" : null
+            }
+        });
     }
 
+    try {
+        // Validate name
+        const nameValidation = validateName(name);
+        if (!nameValidation.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid name format",
+                errors: {
+                    name: nameValidation.errors
+                }
+            });
+        }
 
-    try{
+        // Validate email
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email format",
+                errors: {
+                    email: "Please enter a valid email address"
+                }
+            });
+        }
+
+        // Validate password
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Password does not meet requirements",
+                errors: {
+                    password: passwordValidation.errors
+                }
+            });
+        }
+
+        // Check if user already exists
         const existingUser = await userModel.findOne({email});
         if(existingUser){
-            return res.status(409).json({success: false , message : 'Email already Exists'});
+            return res.status(409).json({
+                success: false, 
+                message: 'Email already exists',
+                errors: {
+                    email: "An account with this email already exists"
+                }
+            });
         }
+
+        // Hash password
         const hashedPassword = await bcryptjs.hash(password , 10);
         const user = new userModel({name , email , password : hashedPassword})
         await user.save();
 
+        // Generate JWT token
         const token = jwt.sign({id : user._id} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
         if(!token){
-            res.status(400).json({success: false , message : " Token Generation Failed"} )
+            return res.status(400).json({
+                success: false, 
+                message : "Token Generation Failed"
+            });
         }
+
+        // Set cookie
         res.cookie('token' , token , {
             httpOnly : true,
             maxAge : 3600000,
             secure : process.env.NODE_ENV === 'production',
             sameSite : process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+        });
 
+        // Send welcome email
+        try {
+            const mailOptions = {
+                from : process.env.USER,
+                to : email ,
+                subject: "Welcome to PalestineAid!",
+                text: `Your account has been created successfully with the email: ${email}`
+            }
+            const transporter = await createTransporter();
+            await transporter.sendMail(mailOptions);
+        } catch (emailError) {
+            console.error('Email sending failed:', emailError.message);
+            // Don't fail registration if email fails
         }
-        )
 
-
-        const mailOptions = {
-            from : process.env.USER,
-            to : email ,
-            subject: "Welcome to PalestineAid!",
-            text: `Your account has been created with the email id :${email}`
-        }
-        const transporter = await createTransporter();
-        await transporter.sendMail(mailOptions);
-
-        // console.log('Preview URL: %s', nodeMailer.getTestMessageUrl(info));
-
-
-        return res.status(201).json({success: true , message: 'Registered Successfully'})
+        return res.status(201).json({
+            success: true, 
+            message: 'Registered Successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
+        });
     }
     catch (err){
-        return res.status(500).json({success: false , message : err.message})
+        console.error('Registration error:', err);
+        return res.status(500).json({
+            success: false, 
+            message : "Internal server error. Please try again."
+        });
     }
 }
 
@@ -130,8 +255,8 @@ exports.logout = (req , res) => {
 exports.sendOtp = async (req, res) => {
   try{
         const { userId } = req.body;
-        console.log('sendOtp called with userId:', userId);
-        console.log('Full request body:', req.body);
+        // console.log('sendOtp called with userId:', userId);
+        // console.log('Full request body:', req.body);
 
   const user = await userModel.findById(userId);
   console.log('User found:', user ? 'Yes' : 'No');
@@ -149,20 +274,15 @@ exports.sendOtp = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
    
-    console.log('Generated OTP:', otp);
-    console.log('OTP expires at:', expiresAt);
 
     user.verifyOtp = otp;
     user.verifyOtpExpiresAt = expiresAt;
     await user.save();
-    console.log('OTP saved to database');
+   
 
     // For now, let's just log the OTP instead of sending email
     // This will help us test the functionality
-    console.log('=== OTP FOR TESTING ===');
-    console.log('Email would be sent to:', user.email);
-    console.log('OTP Code:', otp);
-    console.log('=======================');
+    
 
     // Try to send email, but don't fail if email config is missing
     try {

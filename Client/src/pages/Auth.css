@@ -196,8 +196,62 @@
   transform: translateY(-2px);
 }
 
+.form-input.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
 .form-input::placeholder {
   color: #9ca3af;
+}
+
+/* Error Messages */
+.error-message {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.strength-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
 }
 
 /* Button Styling */
@@ -315,6 +369,16 @@
     left: 0.75rem;
     font-size: 1rem;
   }
+  
+  .password-strength {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .strength-text {
+    min-width: auto;
+  }
 }
 
 /* Dark mode support */
@@ -346,7 +410,15 @@
     border-color: #667eea;
   }
   
+  .form-input.error {
+    border-color: #ef4444;
+  }
+  
   .auth-link {
     color: #94a3b8;
+  }
+  
+  .strength-bar {
+    background: #475569;
   }
 } 
