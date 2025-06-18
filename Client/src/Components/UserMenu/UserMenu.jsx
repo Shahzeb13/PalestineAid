@@ -50,7 +50,7 @@ const UserMenu = () =>{
 
 
      const handleVerification = () => {
-        alert("Verificiaton ......")
+        Navigate('/verify-email');
      }
 
 

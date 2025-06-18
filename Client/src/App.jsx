@@ -7,6 +7,9 @@ import Register from "./pages/Register";
 import Login from "./pages/Login"
 import { Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
+import VerifyEmail from "./pages/VerifyEmial";
+import ResetPassword from "./pages/ResetPassword";
+import OTPDemo from "./Components/OTPDemo/OTPDemo";
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
         <Route path = "/register"  element= {<Register />}  />
         <Route path = "/login"  element= {<Login />}  /> 
         <Route path = "/dashboard"  element = {<Dashboard />} />
+        <Route path = "/verify-email"  element = {<VerifyEmail />} />
+        <Route path = "/reset-password"  element = {<ResetPassword />} />
+        <Route path = "/otp-demo"  element = {<OTPDemo />} />
       </Routes>
 
       <ToastContainer position="top-right"

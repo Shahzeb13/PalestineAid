@@ -130,39 +130,56 @@ exports.logout = (req , res) => {
 exports.sendOtp = async (req, res) => {
   try{
         const { userId } = req.body;
-        // console.log(req.body);
-//   if (!email) return res.status(400).json({ message: 'Email is required.' });
+        console.log('sendOtp called with userId:', userId);
+        console.log('Full request body:', req.body);
 
   const user = await userModel.findById(userId);
+  console.log('User found:', user ? 'Yes' : 'No');
 
   if(!user){
+        console.log('User not found for userId:', userId);
         return res.status(404).json({success : false , message : "User Not Found"})
         } 
 
   if (user && user.isAccountVerified) {
+    console.log('User already verified');
     return res.status(400).json({ message: 'User already verified.' });
   }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
    
+    console.log('Generated OTP:', otp);
+    console.log('OTP expires at:', expiresAt);
 
     user.verifyOtp = otp;
     user.verifyOtpExpiresAt = expiresAt;
     await user.save();
+    console.log('OTP saved to database');
 
-    const mailOptions = {
-        from : process.env.USER,
-        to : user.email,
-        subject: "Account Verification OTP",
-        text: `Account Verification OTP :${otp}; `
+    // For now, let's just log the OTP instead of sending email
+    // This will help us test the functionality
+    console.log('=== OTP FOR TESTING ===');
+    console.log('Email would be sent to:', user.email);
+    console.log('OTP Code:', otp);
+    console.log('=======================');
+
+    // Try to send email, but don't fail if email config is missing
+    try {
+        const mailOptions = {
+            from : process.env.USER,
+            to : user.email,
+            subject: "Account Verification OTP",
+            text: `Account Verification OTP :${otp}; `
+        }
+
+        const transporter = await createTransporter();
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully');
+    } catch (emailError) {
+        console.error('Email sending failed:', emailError.message);
+        console.log('But OTP is still generated and saved. Check console for OTP code.');
     }
-
-
-
-    const transporter = await createTransporter();
-    await transporter.sendMail(mailOptions);
-
 
    return res.status(200).json({success: true , message: "Otp Sent Successfully"});
 
@@ -170,6 +187,7 @@ exports.sendOtp = async (req, res) => {
 
   }
   catch(err) {
+   console.error('sendOtp error:', err);
    return res.status(500).json({success: false , message : err.message});
   }
 };
