@@ -10,12 +10,13 @@ import Dashboard from "./pages/Dashboard";
 import VerifyEmail from "./pages/VerifyEmial";
 import ResetPassword from "./pages/ResetPassword";
 import OTPDemo from "./Components/OTPDemo/OTPDemo";
+import LandingPage from "./pages/LandingPage/LandingPage";
 
 function App() {
   return (
     <>
     <Routes>
-        <Route path = "/" element = {< Navigate to="/register" />} />
+        <Route path = "/" element = {<LandingPage />} />
         <Route path = "/register"  element= {<Register />}  />
         <Route path = "/login"  element= {<Login />}  /> 
         <Route path = "/dashboard"  element = {<Dashboard />} />

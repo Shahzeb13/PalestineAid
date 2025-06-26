@@ -88,7 +88,11 @@ const ResetPassword = () => {
         display: "flex", 
         alignItems: "center", 
         justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        backgroundImage: url("../../Images/background.png"),
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+
       }}>
         <div style={{
           background: "white",
@@ -123,7 +127,10 @@ const ResetPassword = () => {
         display: "flex", 
         alignItems: "center", 
         justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        background: "url('../../Images/background.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"  ,
+        backgroundRepeat: "no-repeat"
       }}>
         <div style={{
           background: "white",
