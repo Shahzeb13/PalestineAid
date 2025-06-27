@@ -63,7 +63,7 @@ const validateName = (name) => {
 // ---------------------Register------------------------
 exports.registerUser = async (req , res ) => {
    
-    const { name , email , password } = req.body;
+    const { name , email , password, role = 'donater' } = req.body;
 
     // Check for missing fields
     if(!name || !email||  !password){
@@ -75,6 +75,14 @@ exports.registerUser = async (req , res ) => {
                 email: !email ? "Email is required" : null,
                 password: !password ? "Password is required" : null
             }
+        });
+    }
+
+    // Prevent admin registration through public API
+    if (role === 'admin') {
+        return res.status(403).json({
+            success: false,
+            message: "Admin registration not allowed through public API"
         });
     }
 
@@ -128,7 +136,7 @@ exports.registerUser = async (req , res ) => {
 
         // Hash password
         const hashedPassword = await bcryptjs.hash(password , 10);
-        const user = new userModel({name , email , password : hashedPassword})
+        const user = new userModel({name , email , password : hashedPassword, role})
         await user.save();
 
         // Generate JWT token
@@ -169,7 +177,8 @@ exports.registerUser = async (req , res ) => {
             user: {
                 id: user._id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         });
     }
@@ -182,6 +191,204 @@ exports.registerUser = async (req , res ) => {
     }
 }
 
+// ---------------------Create Admin (Super Admin Only)------------------------
+exports.createAdmin = async (req, res) => {
+    const { name, email, password } = req.body;
+    const requestingUser = req.user; // From auth middleware
+
+    // Check if requesting user is super admin
+    if (!requestingUser.isSuperAdmin) {
+        return res.status(403).json({
+            success: false,
+            message: "Only super admins can create admin accounts"
+        });
+    }
+
+    // Check for missing fields
+    if (!name || !email || !password) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing required fields"
+        });
+    }
+
+    try {
+        // Validate inputs
+        const nameValidation = validateName(name);
+        if (!nameValidation.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid name format",
+                errors: { name: nameValidation.errors }
+            });
+        }
+
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email format"
+            });
+        }
+
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Password does not meet requirements"
+            });
+        }
+
+        // Check if user already exists
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already exists"
+            });
+        }
+
+        // Hash password and create admin
+        const hashedPassword = await bcryptjs.hash(password, 10);
+        const admin = new userModel({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'admin',
+            isSuperAdmin: false
+        });
+        await admin.save();
+
+        return res.status(201).json({
+            success: true,
+            message: "Admin created successfully",
+            user: {
+                id: admin._id,
+                name: admin.name,
+                email: admin.email,
+                role: admin.role
+            }
+        });
+    } catch (err) {
+        console.error('Admin creation error:', err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+// ---------------------Create First Super Admin------------------------
+exports.createFirstSuperAdmin = async (req, res) => {
+    const { name, email, password } = req.body;
+
+    // Check for missing fields
+    if (!name || !email || !password) {
+        return res.status(400).json({
+            success: false,
+            message: "Missing required fields"
+        });
+    }
+
+    try {
+        // Check if any super admin exists
+        const existingSuperAdmin = await userModel.findOne({ isSuperAdmin: true });
+        if (existingSuperAdmin) {
+            return res.status(403).json({
+                success: false,
+                message: "Super admin already exists"
+            });
+        }
+
+        // Validate inputs
+        const nameValidation = validateName(name);
+        if (!nameValidation.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid name format"
+            });
+        }
+
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email format"
+            });
+        }
+
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Password does not meet requirements"
+            });
+        }
+
+        // Check if user already exists
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already exists"
+            });
+        }
+
+        // Hash password and create super admin
+        const hashedPassword = await bcryptjs.hash(password, 10);
+        const superAdmin = new userModel({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'admin',
+            isSuperAdmin: true
+        });
+        await superAdmin.save();
+
+        // Generate JWT token
+        const token = jwt.sign({ id: superAdmin._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+        
+        // Set cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 3600000,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Super admin created successfully",
+            user: {
+                id: superAdmin._id,
+                name: superAdmin.name,
+                email: superAdmin.email,
+                role: superAdmin.role,
+                isSuperAdmin: superAdmin.isSuperAdmin
+            }
+        });
+    } catch (err) {
+        console.error('Super admin creation error:', err);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+// ---------------------Check if Super Admin Exists------------------------
+exports.checkSuperAdminExists = async (req, res) => {
+    try {
+        const superAdmin = await userModel.findOne({ isSuperAdmin: true });
+        return res.status(200).json({
+            success: true,
+            exists: !!superAdmin
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
 
 //----------------------------Login-----------------------------
 exports.login = async (req , res) => {
@@ -193,22 +400,15 @@ exports.login = async (req , res) => {
      }
 
      try{
-
-
         const user = await userModel.findOne({email});
         if(!user){
             return res.status(401).json({success: false , message : 'Email Not Found'})
         }
 
-
-
         const isMatched = await bcryptjs.compare(password, user.password);
         if(!isMatched){
            return res.status(401).json({success: false , message: "Wrong Password"});
         }
-
-
-
 
          const token = jwt.sign({id : user._id} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
 
@@ -220,11 +420,19 @@ exports.login = async (req , res) => {
             path : "/"
         })
 
-        return res.status(200).json({success : true , message : 'Login Successful'})
+        return res.status(200).json({
+            success : true , 
+            message : 'Login Successful',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isSuperAdmin: user.isSuperAdmin
+            }
+        })
      }
-
-
- catch(err){
+     catch(err){
         return res.status(500).json({success: false , messsage: err.message})
      }
 }
@@ -345,7 +553,7 @@ exports.verifyOTP = async (req , res) => {
 
         user.isAccountVerified = true;
         user.verifyOtp = "";
-        user.verifyOtpExpiresAt = ""
+        user.verifyOtpExpiresAt = null;
 
         await user.save();
 
@@ -366,14 +574,25 @@ exports.verifyOTP = async (req , res) => {
 
 exports.isAuthenticated = async (req , res) => { 
 try{
-    return res.status(200).json({success: true})
+    const user = await userModel.findById(req.user.id).select('-password');
+    if (!user) {
+        return res.status(401).json({success: false, message: "User not found"});
+    }
+    
+    return res.status(200).json({
+        success: true,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            isSuperAdmin: user.isSuperAdmin
+        }
+    });
 }
 catch(err){
-    return res.status(500).json({success : true , message : err.message});
+    return res.status(500).json({success : false , message : err.message});
 }
-
-
-
 }
 
 //-----------------------------------sentResetPasswordOtp---------------------------
@@ -450,7 +669,7 @@ exports.resetPassword =async (req , res) => {
 
 
         
-        if (user.resetOtp = ""  || user.resetOtp !== otp) {
+        if (user.resetOtp === ""  || user.resetOtp !== otp) {
             return res.status(400).json({ success: false, message: "Incorrect OTP" });
         }
 
@@ -463,7 +682,7 @@ exports.resetPassword =async (req , res) => {
 
           user.password = hashedPassword;
             user.resetOtp = "";
-        user.resetOtpExpiresAt = 0;
+        user.resetOtpExpiresAt = null;
         await user.save();
 
         return res.status(200).json({ success: true, message: "Password reset successfully" })

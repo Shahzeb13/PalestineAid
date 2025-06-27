@@ -15,7 +15,7 @@ const VerifyEmail = () => {
       console.log('Sending OTP request...');
       
       const response = await axios.post(
-        'http://localhost:5000/api/auth/sendOTP',
+        'http://localhost:5000/api/auth/send-otp',
         {}, // No need to send userId - middleware will add it
         { withCredentials: true }
       );
@@ -49,7 +49,7 @@ const VerifyEmail = () => {
       console.log('Verifying OTP:', otp);
       
       const response = await axios.post(
-        'http://localhost:5000/api/auth/verifyOTP',
+        'http://localhost:5000/api/auth/verify-otp',
         { otp }, // No need to send userId - middleware will add it
         { withCredentials: true }
       );
@@ -101,7 +101,7 @@ const VerifyEmail = () => {
     console.log('=== TESTING OTP SENDING ===');
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/auth/sendOTP',
+        'http://localhost:5000/api/auth/send-otp',
         {},
         { withCredentials: true }
       );

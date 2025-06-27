@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { toast } from 'react-toastify';
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import "./Auth.css";
+import { useAuth } from "../Context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -13,17 +14,10 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
-
-      const message = response.data.message;
-      toast.success(message);
-
+      await login(email, password);
+      toast.success("Login successful!");
       setPassword("");
       setEmail("");
       navigate('/dashboard');
@@ -49,10 +43,10 @@ const Login = () => {
         <div className="auth-header">
           <div className="auth-logo">
             <span className="logo-icon">🕊️</span>
-            <h1 className="logo-text">PalestineAid</h1>
+            <h1 className="logo-text" style={{ color: "black" }}>PalestineAid</h1>
           </div>
           <h2 className="auth-title">Welcome Back</h2>
-          <p className="auth-subtitle">Sign in to your account to continue</p>
+          <p className="auth-subtitle">Sign in to continue your journey</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
@@ -110,9 +104,6 @@ const Login = () => {
           <div className="auth-links">
             <Link to="/register" className="auth-link">
               Don't have an account? <span>Sign Up</span>
-            </Link>
-            <Link to="/reset-password" className="auth-link">
-              Forgot Password?
             </Link>
           </div>
         </div>
