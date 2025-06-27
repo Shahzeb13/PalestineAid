@@ -7,13 +7,13 @@ const recieverDashboardSchema = new mongoose.Schema({
     requestDescription: {type: String, required: true},
     date : {type: Date , required: true},
     location : {type: String , required: true},
-    urgencyLevel :{type: String , enum : ["low" , "medium" , "high"] , required: true},
-    requestType : {type: String , enum : ["money" , "food" , "clothes"] , required: true},
-    role : {type: String , enum : ["individual" , "family" , "organization"] , required: true},
+    urgencyLevel :{type: String , enum : ["Low" , "Medium" , "High"] , required: true},
+    requestType : {type: String , enum : ["Money" , "Food" , "Clothes"  ,"Shelter" ] , required: true},
+    recieverRole : {type: String , enum : ["Individual" , "Family" , "Organization"] , required: true},
     deadline : {type: Date , required: true},
     status : {type: String , 
-        enum : ["confirmed" , "pending" , "rejected"],
-        default : "pending"
+        enum : ["Confirmed" , "Pending" , "Rejected"],
+        default : "Pending"
     },
     proofImage : {type:String  , required: true},   
     

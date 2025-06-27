@@ -140,7 +140,7 @@ exports.registerUser = async (req , res ) => {
         await user.save();
 
         // Generate JWT token
-        const token = jwt.sign({id : user._id} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
+        const token = jwt.sign({id : user._id , role : user.role} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
         if(!token){
             return res.status(400).json({
                 success: false, 
@@ -183,10 +183,15 @@ exports.registerUser = async (req , res ) => {
         });
     }
     catch (err){
-        console.error('Registration error:', err);
+        console.error('Registration error details:', {
+            message: err.message,
+            stack: err.stack,
+            body: req.body
+        });
         return res.status(500).json({
             success: false, 
-            message : "Internal server error. Please try again."
+            message : "Internal server error. Please try again.",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
 }
@@ -344,7 +349,7 @@ exports.createFirstSuperAdmin = async (req, res) => {
         await superAdmin.save();
 
         // Generate JWT token
-        const token = jwt.sign({ id: superAdmin._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ id: superAdmin._id , role: superAdmin.role}, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
         
         // Set cookie
         res.cookie('token', token, {
@@ -410,7 +415,7 @@ exports.login = async (req , res) => {
            return res.status(401).json({success: false , message: "Wrong Password"});
         }
 
-         const token = jwt.sign({id : user._id} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
+         const token = jwt.sign({id : user._id , role :user.role} , process.env.JWT_SECRET_KEY , {expiresIn : '1h'})
 
         res.cookie('token' , token , {
             httpOnly : true,

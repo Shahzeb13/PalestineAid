@@ -19,7 +19,7 @@ exports.handleRecieverRequest = async (req , res) => {
             location,
             urgencyLevel,
             requestType,
-            role,
+            recieverRole,
             deadline,
             status,
             proofImage
@@ -40,7 +40,7 @@ exports.handleRecieverRequest = async (req , res) => {
           if (
             !recieverId || !requestName?.trim() || !requestDescription?.trim() ||
             !date || !location?.trim() || !urgencyLevel || !requestType ||
-            !role || !deadline || !status || !proofImage?.trim()
+            !recieverRole || !deadline || !status || !proofImage?.trim()
           ) {
             return res.status(400).json({ success: false, message: "All fields are required" });
           }
@@ -51,7 +51,7 @@ exports.handleRecieverRequest = async (req , res) => {
 
 
 
-        const recieverRequest = await recieverRequestModel.create({recieverId , requestName , requestDescription , date , location , urgencyLevel , requestType , role , deadline , status , proofImage});
+        const recieverRequest = await recieverRequestModel.create({recieverId , requestName , requestDescription , date , location , urgencyLevel , requestType , recieverRole , deadline , status , proofImage});
 
         return res.status(201).json({success: true  , message: "Reciever request created successfully" , recieverRequest});
 
@@ -60,6 +60,7 @@ exports.handleRecieverRequest = async (req , res) => {
 
     } catch (error) {
         return res.status(500).json({success: false  , message: error.message})
+
 }
 
 
