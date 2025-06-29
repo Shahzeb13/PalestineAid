@@ -1,37 +1,35 @@
 const jwt = require('jsonwebtoken');
 
-
-exports.authenticateUser = (req , res , next) => {
-
+exports.authenticateUser = (req, res, next) => {
     const token = req.cookies.token;
+    
     console.log('Token from cookies:', token ? 'Present' : 'Missing');
 
-    if(!token){
+    if (!token) {
         console.log('No token found in cookies');
-        return res.status(401).json({ success : false , message: "No token Found!"});
-
+        return res.status(401).json({ success: false, message: "No token Found!" });
     }
-
-
-
 
     try {
-        const decodedToken  = jwt.verify(token  , process.env.JWT_SECRET_KEY);
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
         
         console.log('Decoded token:', JSON.stringify(decodedToken, null, 2));
-        console.log('User ID from token:', decodedToken.id);
-
+        // console.log('User ID from token:', decodedToken.id);
+        const userRole = decodedToken.role;
+        
+        // Set user info in req.user for consistency
+        req.user = { id: decodedToken.id };
+        
+        // Also set userId in req.body for backward compatibility with OTP functions
         req.body.userId = decodedToken.id;
-        console.log('Added userId to req.body:', req.body.userId);
+        req.body.role = userRole;
+        
+        // console.log('Added userId to req.user:', req.user.id);
+        // console.log('Added userId to req.body:', req.body.userId);
             
         next();
-       
-    }
-
-    catch(err){
+    } catch (err) {
         console.error('Token verification error:', err);
-        return res.status(500).json({success: false , message : err.message})    }
-
-
-
-}
+        return res.status(500).json({ success: false, message: err.message });
+    }
+};

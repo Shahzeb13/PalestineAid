@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { toast } from 'react-toastify';
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./Auth.css";
+import { useAuth } from "../Context/AuthContext";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("donater");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -159,20 +161,14 @@ const Register = () => {
       toast.error("Please fix the validation errors");
       return;
     }
-    
+
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        { name, email, password },
-        { withCredentials: true }
-      );
-
-      const message = response.data.message;
-      toast.success(message);
-
+      await register({ name, email, password, role });
+      toast.success("Registration successful!");
       setName("");
       setPassword("");
       setEmail("");
+      setRole("donater");
       setErrors({});
       setPasswordStrength(0);
       navigate('/dashboard');
@@ -200,11 +196,11 @@ const Register = () => {
         </div>
       </div>
       
-      <div className="auth-card">
+      <div className="auth-card register-form">
         <div className="auth-header">
           <div className="auth-logo">
             <span className="logo-icon">🕊️</span>
-            <h1 className="logo-text">PalestineAid</h1>
+            <h1 className="logo-text" style={{ color: "black" }}>PalestineAid</h1>
           </div>
           <h2 className="auth-title">Create Account</h2>
           <p className="auth-subtitle">Join us to make a difference together</p>
@@ -270,25 +266,6 @@ const Register = () => {
                 required
               />
             </div>
-            
-            {/* Password Strength Indicator */}
-            {password && (
-              <div className="password-strength">
-                <div className="strength-bar">
-                  <div 
-                    className="strength-fill"
-                    style={{ 
-                      width: `${(passwordStrength / 5) * 100}%`,
-                      backgroundColor: getPasswordStrengthColor()
-                    }}
-                  ></div>
-                </div>
-                <span className="strength-text" style={{ color: getPasswordStrengthColor() }}>
-                  {getPasswordStrengthText()}
-                </span>
-              </div>
-            )}
-            
             {errors.password && (
               <div className="error-message">
                 {Array.isArray(errors.password) ? errors.password.map((err, index) => (
@@ -296,6 +273,24 @@ const Register = () => {
                 )) : errors.password}
               </div>
             )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="role" className="form-label">Role</label>
+            <div className="input-wrapper">
+              <span className="input-icon">👥</span>
+              <select
+                id="role"
+                name="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="form-input"
+                required
+              >
+                <option value="donater">Donor</option>
+                <option value="receiver">Receiver</option>
+              </select>
+            </div>
           </div>
 
           <button

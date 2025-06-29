@@ -1,44 +1,27 @@
-import axios from "axios";
-import Navbar from "../Components/navbar/navbar.jsx"
-import Welcome from "../Components/welcome/Welcome.jsx";
-import { useNavigate } from "react-router-dom"; 
-import { useEffect } from "react";
+import { useAuth } from '../Context/AuthContext';
+import { Navigate } from 'react-router-dom';
+
 const Dashboard = () => {
-  
-    const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-    useEffect(() => {
-        const checkAuth =async () => {
-            try {
-                 await axios.post(' http://localhost:5000/api/auth/is-auth' ,{} ,{
-                    withCredentials : true
-                });
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
 
-            }
-            catch(err){
-                navigate('/login')
-            }
-        }
-
-        checkAuth();
-    } , [])
-return (
-
-
-    <>
-    <Navbar />
-    <Welcome />
-
-    
-
-
-    </>
-    
-)
-
-
-}
-
+  switch (user.role) {
+    case 'admin':
+      return <Navigate to="/admin-dashboard" />;
+    case 'donater':
+      return <Navigate to="/donater-dashboard" />;
+    case 'receiver':
+      return <Navigate to="/receiver-dashboard" />;
+    default:
+      return <Navigate to="/login" />;
+  }
+};
 
 export default Dashboard;
