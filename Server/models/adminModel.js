@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const adminDashboardSchema = mongoose.Schema({
-    adminId : {type :mongoose.Schema.Types.ObjectId , ref : "User" ,  required: true } , 
-    userId : { type : mongoose.Schema.Types.ObjectId , ref : "User" , required: true},
+    adminId : {type :mongoose.Schema.Types.ObjectId , ref : "user" ,  required: true } , 
+    userId : { type : mongoose.Schema.Types.ObjectId , ref : "user" , required: true},
     requestId : {type : mongoose.Schema.Types.ObjectId , ref:"recieverDashboard" , required : true},
-    requestStatus : {type: String , enum : ["pending" , "approved" , "rejected"] , default:"pending"}
+    requestStatus : {type: String , enum : ["Confirmed" , "Approved" , "Rejected"] , default:"Pending"}
 }
 )
 

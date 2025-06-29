@@ -63,26 +63,27 @@ const validateName = (name) => {
 // ---------------------Register------------------------
 exports.registerUser = async (req , res ) => {
    
-    const { name , email , password, role = 'donater' } = req.body;
+    const { name , email , password, role } = req.body;
 
     // Check for missing fields
-    if(!name || !email||  !password){
+    if(!name || !email||  !password || !role){
         return res.status(400).json({
             success: false, 
             message: "Missing required fields",
             errors: {
                 name: !name ? "Name is required" : null,
                 email: !email ? "Email is required" : null,
-                password: !password ? "Password is required" : null
+                password: !password ? "Password is required" : null,
+                role: !role ? "Role is required" : null
             }
         });
     }
 
-    // Prevent admin registration through public API
-    if (role === 'admin') {
-        return res.status(403).json({
+    // Validate role - only allow donater and receiver
+    if (!["donater", "receiver"].includes(role)) {
+        return res.status(400).json({
             success: false,
-            message: "Admin registration not allowed through public API"
+            message: "Role must be either 'donater' or 'receiver'"
         });
     }
 

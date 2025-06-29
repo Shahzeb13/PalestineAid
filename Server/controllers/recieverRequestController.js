@@ -21,7 +21,6 @@ exports.handleRecieverRequest = async (req , res) => {
             requestType,
             recieverRole,
             deadline,
-            status,
             proofImage
           } = req.body;
           
@@ -33,38 +32,42 @@ exports.handleRecieverRequest = async (req , res) => {
             return res.status(404).json({ success: false, message: "User not found" });
           }
           
-
-
-
-          
           if (
             !recieverId || !requestName?.trim() || !requestDescription?.trim() ||
             !date || !location?.trim() || !urgencyLevel || !requestType ||
-            !recieverRole || !deadline || !status || !proofImage?.trim()
+            !recieverRole || !deadline || !proofImage?.trim()
           ) {
             return res.status(400).json({ success: false, message: "All fields are required" });
           }
           
-        // Removed duplicate variable declaration and unnecessary reciever existence check
+        // Create request without status - it will default to "Pending"
+        const recieverRequest = await recieverRequestModel.create({
+            recieverId, 
+            requestName, 
+            requestDescription, 
+            date, 
+            location, 
+            urgencyLevel, 
+            requestType, 
+            recieverRole, 
+            deadline, 
+            proofImage
+        });
 
-
-
-
-
-        const recieverRequest = await recieverRequestModel.create({recieverId , requestName , requestDescription , date , location , urgencyLevel , requestType , recieverRole , deadline , status , proofImage});
-
-        return res.status(201).json({success: true  , message: "Reciever request created successfully" , recieverRequest});
-
-
-
+        return res.status(201).json({
+            success: true, 
+            message: "Receiver request created successfully", 
+            requestId: recieverRequest._id, 
+            recieverRequest
+        });
 
     } catch (error) {
-        return res.status(500).json({success: false  , message: error.message})
-
+        return res.status(500).json({success: false, message: error.message})
+    }
 }
 
 
-}
+
 
 
 
@@ -79,9 +82,9 @@ exports.getRecieverDashboardData = async (req, res) => {
 
     const totalRequests = await recieverRequestModel.countDocuments({ recieverId });
 
-    const approvedRequests = await recieverRequestModel.find({ recieverId, status: "confirmed" });
-    const pendingRequests = await recieverRequestModel.find({ recieverId, status: "pending" });
-    const rejectedRequests = await recieverRequestModel.find({ recieverId, status: "rejected" });
+    const approvedRequests = await recieverRequestModel.find({ recieverId, status: "Confirmed" });
+    const pendingRequests = await recieverRequestModel.find({ recieverId, status: "Pending" });
+    const rejectedRequests = await recieverRequestModel.find({ recieverId, status: "Rejected" });
 
     const latestRequest = await recieverRequestModel.findOne({ recieverId }).sort({ createdAt: -1 });
 
