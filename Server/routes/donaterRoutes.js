@@ -1,11 +1,11 @@
 const express = require('express');
 const donaterRouter = express.Router();
-const { getConfirmedRequests, getRequestDetails, handleDonation } = require("../controllers/donaterController");
+const { getConfirmedRequests, getRequestDetails, getDonationHistory } = require("../controllers/donaterController");
 const { authenticateUser } = require("../middlewares/authenticateUser.js");
 
 donaterRouter.get("/confirmedRequests", authenticateUser, getConfirmedRequests);
 donaterRouter.get("/request/:requestId", authenticateUser, getRequestDetails);
-donaterRouter.post("/donate/:requestId", authenticateUser, handleDonation);
+donaterRouter.get("/donationHistory", authenticateUser, getDonationHistory);
 
 module.exports = donaterRouter; 
 

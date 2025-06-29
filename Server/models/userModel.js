@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
     verifyOtpExpiresAt : { type : Date , default: null},
     isAccountVerified : { type : Boolean , default : false},
     resetOtp : {type : String , default : ""},
-    resetOtpExpiresAt : {type : Date , default: null}
+    resetOtpExpiresAt : {type : Date , default: null},
+    stripeCustomerId : { type : String , default : null}
 })
 
 const user = mongoose.models.user  || mongoose.model('user' , userSchema );

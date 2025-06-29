@@ -16,6 +16,16 @@ const donatorDashboardSchema = new  mongoose.Schema({
     date: {type: Date, default: Date.now, required: true},
     status : {type : String , enum : ["Pending" , "Donated" , "Rejected"] , default: "Pending"},
     
+    // Stripe payment tracking
+    stripePaymentIntentId: {type: String, default: null},
+    paymentStatus: {type: String, enum: ["pending", "completed", "failed", "canceled"], default: "pending"},
+    
+    // Admin to NGO payment tracking
+    adminPaymentStatus: {type: String, enum: ["pending", "completed", "failed"], default: "pending"},
+    adminPaymentDate: {type: Date, default: null},
+    adminPaymentMethod: {type: String, default: null}, // "bank_transfer", "check", "cash", etc.
+    adminPaymentNotes: {type: String, default: null},
+    
     // Tracking fields
     processedBy: {type: mongoose.Schema.Types.ObjectId, ref: "user"}, // Which admin processed
     processedAt: {type: Date}, // When it was processed
@@ -28,6 +38,8 @@ const donatorDashboardSchema = new  mongoose.Schema({
 donatorDashboardSchema.index({donaterId: 1, date: -1}) // For donor history
 donatorDashboardSchema.index({requestId: 1}) // For request tracking
 donatorDashboardSchema.index({status: 1}) // For status filtering
+donatorDashboardSchema.index({stripePaymentIntentId: 1})
+donatorDashboardSchema.index({adminPaymentStatus: 1}) // For admin payment tracking
 
 const donaterDashboardModel = mongoose.models.donaterDashboardModel ||  mongoose.model("donaterDashboardModel" , donatorDashboardSchema )
 module.exports = donaterDashboardModel; 

@@ -170,7 +170,7 @@ exports.getRequestDetails = async (req, res) => {
 exports.handleDonation = async (req, res) => {
     try {
         const { userId } = req.body; // From middleware
-        const { action, amount, currency, message } = req.body;
+        const { action, amount, currency, message, paymentIntentId } = req.body;
         const requestId = req.params.requestId;
         // Validate if user is a donater
         const donater = await userModel.findById(userId);
@@ -218,7 +218,9 @@ exports.handleDonation = async (req, res) => {
             amount: amount,
             currency: currency,
             message: message || "",
-            status: action === "donate" ? "Donated" : "Rejected"
+            status: action === "donate" ? "Donated" : "Rejected",
+            stripePaymentIntentId: paymentIntentId || null,
+            paymentStatus: paymentIntentId ? "completed" : "pending"
         });
 
         await donation.save();
@@ -231,12 +233,67 @@ exports.handleDonation = async (req, res) => {
                 amount: donation.amount,
                 currency: donation.currency,
                 status: donation.status,
-                date: donation.date
+                date: donation.date,
+                paymentIntentId: donation.stripePaymentIntentId,
+                paymentStatus: donation.paymentStatus
             }
         });
 
     } catch (err) {
         console.error("Handle donation error:", {
+            error: err.message,
+            stack: err.stack,
+            body: req.body
+        });
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error. Please try again.",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
+};
+
+// Get donation history for a donater
+exports.getDonationHistory = async (req, res) => {
+    try {
+        const { userId } = req.body; // From middleware
+
+        // Validate if user is a donater
+        const donater = await userModel.findById(userId);
+        if (!donater || donater.role !== "donater") {
+            return res.status(403).json({
+                success: false,
+                message: "Only donaters can view donation history"
+            });
+        }
+
+        // Get all donations by this donater
+        const donations = await donaterModel.find({ donaterId: userId })
+            .populate("requestId", "requestName requestDescription location urgencyLevel requestType role deadline")
+            .populate("adminId", "name email")
+            .sort({ date: -1 }); // Most recent first
+
+        return res.json({
+            success: true,
+            message: "Donation history retrieved successfully",
+            total: donations.length,
+            donations: donations.map(donation => ({
+                id: donation._id,
+                amount: donation.amount,
+                currency: donation.currency,
+                message: donation.message,
+                status: donation.status,
+                paymentStatus: donation.paymentStatus,
+                date: donation.date,
+                request: donation.requestId,
+                admin: donation.adminId,
+                stripePaymentIntentId: donation.stripePaymentIntentId
+            }))
+        });
+
+    } catch (err) {
+        console.error("Get donation history error:", {
             error: err.message,
             stack: err.stack,
             body: req.body
