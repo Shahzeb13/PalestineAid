@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { ToastContainer } from "react-toastify";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -19,59 +20,13 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import FirstAdminSetup from "./Components/FirstAdminSetup";
 import { AuthProvider } from "./Context/AuthContext";
 >>>>>>> client_side_auth
+=======
+import Login from './components/Login';
+>>>>>>> client_side_auth
 
 function App() {
-  const [superAdminExists, setSuperAdminExists] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    checkSuperAdmin();
-  }, []);
-
-  const checkSuperAdmin = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/auth/check-super-admin');
-      setSuperAdminExists(response.data.exists);
-    } catch (error) {
-      console.error('Error checking super admin:', error);
-      setSuperAdminExists(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to refresh super admin status after creation
-  const refreshSuperAdminStatus = () => {
-    setSuperAdminExists(true);
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  // If no super admin exists, show setup page
-  if (!superAdminExists) {
-    return (
-      <AuthProvider>
-        <Routes>
-          <Route path="/setup-super-admin" element={<FirstAdminSetup onSuccess={refreshSuperAdminStatus} />} />
-          <Route path="*" element={<Navigate to="/setup-super-admin" />} />
-        </Routes>
-        <ToastContainer position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-        />
-      </AuthProvider>
-    );
-  }
-
-  // Normal app flow when super admin exists
   return (
+<<<<<<< HEAD
 <<<<<<< HEAD
     <>
     <Routes>
@@ -121,6 +76,11 @@ function App() {
         draggable
       />
     </AuthProvider>
+=======
+    <div>
+      <Login />
+    </div>
+>>>>>>> client_side_auth
   );
 }
 
