@@ -167,92 +167,92 @@ exports.getRequestDetails = async (req, res) => {
     }
 };
 
-exports.handleDonation = async (req, res) => {
-    try {
-        const { userId } = req.body; // From middleware
-        const { action, amount, currency, message, paymentIntentId } = req.body;
-        const requestId = req.params.requestId;
-        // Validate if user is a donater
-        const donater = await userModel.findById(userId);
-        if (!donater || donater.role !== "donater") {
-            return res.status(403).json({
-                success: false,
-                message: "Only donaters can make donations"
-            });
-        }
-
-        // Validate required fields
-        if (!requestId || !action || !amount || !currency) {
-            return res.status(400).json({
-                success: false,
-                message: "Missing required fields: requestId, action, amount, currency"
-            });
-        }
-
-        // Validate action
-        if (!["donate", "reject"].includes(action)) {
-            return res.status(400).json({
-                success: false,
-                message: "Action must be either 'donate' or 'reject'"
-            });
-        }
-
-        // Check if request exists and is confirmed
-        const adminEntry = await adminDashboardModel.findOne({//adminEntry means that If req is confirmed by admin or not
-            requestId: requestId,
-            requestStatus: "Confirmed"
-        });
-
-        if (!adminEntry) {
-            return res.status(404).json({
-                success: false,
-                message: "Request not found or not confirmed"
-            });
-        }
-
-        // Create donation record
-        const donation = new donaterModel({
-            donaterId: userId,
-            requestId: requestId,
-            adminId: adminEntry.adminId,
-            amount: amount,
-            currency: currency,
-            message: message || "",
-            status: action === "donate" ? "Donated" : "Rejected",
-            stripePaymentIntentId: paymentIntentId || null,
-            paymentStatus: paymentIntentId ? "completed" : "pending"
-        });
-
-        await donation.save();
-
-        return res.json({
-            success: true,
-            message: `Request ${action}d successfully`,
-            donation: {
-                id: donation._id,
-                amount: donation.amount,
-                currency: donation.currency,
-                status: donation.status,
-                date: donation.date,
-                paymentIntentId: donation.stripePaymentIntentId,
-                paymentStatus: donation.paymentStatus
-            }
-        });
-
-    } catch (err) {
-        console.error("Handle donation error:", {
-            error: err.message,
-            stack: err.stack,
-            body: req.body
-        });
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error. Please try again.",
-            error: process.env.NODE_ENV === 'development' ? err.message : undefined
-        });
-    }
-};
+// exports.handleDonation = async (req, res) => {
+//     try {
+//         const { userId } = req.body; // From middleware
+//         const { action, amount, currency, message, paymentIntentId } = req.body;
+//         const requestId = req.params.requestId;
+//         // Validate if user is a donater
+//         const donater = await userModel.findById(userId);
+//         if (!donater || donater.role !== "donater") {
+//             return res.status(403).json({
+//                 success: false,
+//                 message: "Only donaters can make donations"
+//             });
+//         }
+//
+//         // Validate required fields
+//         if (!requestId || !action || !amount || !currency) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Missing required fields: requestId, action, amount, currency"
+//             });
+//         }
+//
+//         // Validate action
+//         if (!["donate", "reject"].includes(action)) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Action must be either 'donate' or 'reject'"
+//             });
+//         }
+//
+//         // Check if request exists and is confirmed
+//         const adminEntry = await adminDashboardModel.findOne({//adminEntry means that If req is confirmed by admin or not
+//             requestId: requestId,
+//             requestStatus: "Confirmed"
+//         });
+//
+//         if (!adminEntry) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Request not found or not confirmed"
+//             });
+//         }
+//
+//         // Create donation record
+//         const donation = new donaterModel({
+//             donaterId: userId,
+//             requestId: requestId,
+//             adminId: adminEntry.adminId,
+//             amount: amount,
+//             currency: currency,
+//             message: message || "",
+//             status: action === "donate" ? "Donated" : "Rejected",
+//             stripePaymentIntentId: paymentIntentId || null,
+//             paymentStatus: paymentIntentId ? "completed" : "pending"
+//         });
+//
+//         await donation.save();
+//
+//         return res.json({
+//             success: true,
+//             message: `Donation ${action}d successfully`,
+//             donation: {
+//                 id: donation._id,
+//                 amount: donation.amount,
+//                 currency: donation.currency,
+//                 status: donation.status,
+//                 date: donation.date,
+//                 paymentIntentId: donation.stripePaymentIntentId,
+//                 paymentStatus: donation.paymentStatus
+//             }
+//         });
+//
+//     } catch (err) {
+//         console.error("Handle donation error:", {
+//             error: err.message,
+//             stack: err.stack,
+//             body: req.body
+//         });
+//
+//         return res.status(500).json({
+//             success: false,
+//             message: "Internal server error. Please try again.",
+//             error: process.env.NODE_ENV === 'development' ? err.message : undefined
+//         });
+//     }
+// };
 
 // Get donation history for a donater
 exports.getDonationHistory = async (req, res) => {

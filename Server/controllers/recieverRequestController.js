@@ -1,5 +1,7 @@
 const recieverRequestModel = require("../models/recieverModel");
 const userModel = require("../models/userModel");
+const createTransporter = require("../config/nodeMailer.js")
+const nodeMailer = require("nodemailer")
 
 
 
@@ -31,7 +33,9 @@ exports.handleRecieverRequest = async (req , res) => {
           if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
           }
-          
+
+          const requesterEmail = user.email; // email of the person who files the request
+          console.log(`Reqeuster Email :  ${requesterEmail}`);
           if (
             !recieverId || !requestName?.trim() || !requestDescription?.trim() ||
             !date || !location?.trim() || !urgencyLevel || !requestType ||
@@ -53,6 +57,71 @@ exports.handleRecieverRequest = async (req , res) => {
             deadline, 
             proofImage
         });
+
+        try {
+          const mailOptions = {
+            from: process.env.USER,
+            to:requesterEmail ,
+            subject: "Welcome to PalestineAid!",
+            html: `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>PalestineAid</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+                    .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+                    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+                    .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
+                    .content { padding: 40px 30px; line-height: 1.6; }
+                    .message { background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 20px 0; border-radius: 5px; }
+                    .footer { background-color: #f8f9fa; padding: 20px 30px; text-align: center; color: #666; font-size: 14px; }
+                    .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; margin: 20px 0; font-weight: 500; }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <h1>�� PalestineAid</h1>
+                        <p>Connecting Hearts, Building Hope</p>
+                    </div>
+                    <div class="content">
+                        <h2>Welcome to PalestineAid!</h2>
+                        <p>Dear <strong>${user.name}</strong>,</p>
+                        <div class="message">
+                            <p>Your request Have been successfully Submitted: <strong>${requesterEmail}</strong></p>
+                            <p>Thank you for joining our community of hope and support.</p>
+                        </div>
+                        <p>You can now:</p>
+                        <ul>
+                            <li>Create aid requests if you're a receiver</li>
+                            <li>Browse and donate to verified requests if you're a donater</li>
+                            <li>Manage and approve requests if you're an admin</li>
+                        </ul>
+                        <a href="http://localhost:3000/login" class="button">Login to Your Account</a>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 PalestineAid. All rights reserved.</p>
+                        <p>This email was sent to ${requesterEmail}</p>
+                    </div>
+                </div>
+            </body>
+            </html>`
+        };
+          const transporter = await createTransporter();
+          await transporter.sendMail(mailOptions);
+      } catch (emailError) {
+          console.error('Email sending failed:', {
+            message :emailError.message,
+            stack : emailError.stack,
+            body: req.body
+          }
+          );
+
+          // Don't fail registration if email fails
+      }
+
 
         return res.status(201).json({
             success: true, 
