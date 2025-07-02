@@ -2,6 +2,7 @@ const adminDashboardModel = require("../models/adminModel");
 const recieverModel = require("../models/recieverModel");
 const donaterModel = require("../models/donaterModel");
 const userModel = require("../models/userModel");
+const donationIntentModel = require("../models/donationIntentModel");
 
 exports.getConfirmedRequests = async (req, res) => {
     try {
@@ -348,24 +349,43 @@ exports.getDonationById = async (req, res) => {
 exports.getDonationsByEmail = async (req, res) => {
     try {
         const { email } = req.query;
+        
         if (!email) {
-            return res.status(400).json({ success: false, message: "Email is required" });
+            return res.status(400).json({ 
+                success: false, 
+                message: "Email is required" 
+            });
         }
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: "No user found with this email" });
+
+        // Normalize email to lowercase for consistent search
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // First, check if user exists
+        const user = await userModel.findOne({ email: normalizedEmail });
+        
+        // Get actual donations if user exists
+        let donations = [];
+        if (user) {
+            donations = await donaterModel.find({ donaterId: user._id })
+                .populate("requestId", "requestName requestDescription location urgencyLevel requestType role deadline")
+                .populate("adminId", "name email")
+                .sort({ date: -1 });
         }
-        const donations = await donaterModel.find({ donaterId: user._id })
-            .populate("requestId", "requestName requestDescription location urgencyLevel requestType role deadline")
-            .populate("adminId", "name email")
-            .sort({ date: -1 });
-        if (!donations.length) {
-            return res.status(404).json({ success: false, message: "No donations found for this email" });
-        }
-        return res.json({
-            success: true,
-            donations: donations.map(donation => ({
+
+        // Also get donation intents for this email
+        const donationIntents = await donationIntentModel.find({ 
+            email: normalizedEmail,
+            status: { $in: ["pending", "completed"] }
+        }).sort({ createdAt: -1 });
+
+        // Combine and format results
+        const allDonations = [];
+
+        // Add actual donations
+        donations.forEach(donation => {
+            allDonations.push({
                 id: donation._id,
+                type: 'donation',
                 amount: donation.amount,
                 currency: donation.currency,
                 message: donation.message,
@@ -376,9 +396,53 @@ exports.getDonationsByEmail = async (req, res) => {
                 request: donation.requestId,
                 admin: donation.adminId,
                 stripePaymentIntentId: donation.stripePaymentIntentId
-            }))
+            });
         });
+
+        // Add donation intents
+        donationIntents.forEach(intent => {
+            allDonations.push({
+                id: intent._id,
+                type: 'intent',
+                amount: intent.amount,
+                currency: intent.currency,
+                message: intent.message,
+                status: intent.status,
+                paymentStatus: intent.status === 'completed' ? 'completed' : 'pending',
+                adminPaymentStatus: 'pending',
+                date: intent.createdAt,
+                request: null,
+                admin: null,
+                expiresAt: intent.expiresAt,
+                isIntent: true
+            });
+        });
+
+        // Sort by date (newest first)
+        allDonations.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        if (allDonations.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "No donations or donation intents found for this email" 
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: `Found ${allDonations.length} donation(s) and intent(s)`,
+            donations: allDonations,
+            totalCount: allDonations.length,
+            actualDonations: donations.length,
+            donationIntents: donationIntents.length
+        });
+
     } catch (err) {
-        return res.status(500).json({ success: false, message: "Failed to get donations by email" });
+        console.error("Get donations by email error:", err);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Failed to get donations by email",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 }; 
