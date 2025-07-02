@@ -8,7 +8,7 @@ const donatorDashboardSchema = new  mongoose.Schema({
     
     // Donation details - donors always give money
     amount :{type: Number , min:0.01  , required : true },
-    currency : { type: String , enum : ["USD" , "Pound" , "Rupees"] , required : true},
+    currency : { type: String , enum : ["usd", "USD" , "Pound" , "Rupees"] , required : true},
     
     // Optional message from donor
     message: {type: String, maxLength: 500},

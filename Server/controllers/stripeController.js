@@ -92,7 +92,7 @@ exports.createDonationPaymentIntent = async (req, res) => {
                       </div>
                       <div class="content">
                           <h2>Welcome to PalestineAid!</h2>
-                          <p>Dear <strong>${user.name}</strong>,</p>
+                          <p>Dear <strong>${donater.name}</strong>,</p>
                           <div class="message">
                               <p>Your Stripe Donation intent has been created successfully: <strong>${donorEmail}</strong></p>
                               <p>Thank you for joining our community of hope and support.</p>
@@ -136,10 +136,18 @@ exports.createDonationPaymentIntent = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Create donation payment intent error:", err);
+        console.error("Create donation payment intent error:", {
+            error: err.message,
+            stack: err.stack,
+            body: req.body,
+            userId: req.body.userId,
+            requestId: req.body.requestId,
+            amount: req.body.amount
+        });
         return res.status(500).json({
             success: false,
-            message: "Failed to create payment intent"
+            message: "Failed to create payment intent",
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
 };
@@ -237,7 +245,7 @@ exports.confirmDonation = async (req, res) => {
                       </div>
                       <div class="content">
                           <h2>Welcome to PalestineAid!</h2>
-                          <p>Dear <strong>${user.name}</strong>,</p>
+                          <p>Dear <strong>${donater.name}</strong>,</p>
                           <div class="message">
                               <p>Your Stripe Donation has been completed Successfully: <strong>${donorEmail}</strong></p>
                               <p>Thank you for joining our community of hope and support.</p>

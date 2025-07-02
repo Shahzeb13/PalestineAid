@@ -383,7 +383,7 @@ const DonaterDashboard = () => {
           <p>Your Donations</p>
         </div>
         <div className="stat-card">
-          <h3>₨{donationHistory.reduce((total, donation) => total + (donation.amount || 0), 0) / 100}</h3>
+          <h3>${donationHistory.reduce((total, donation) => total + (donation.amount || 0), 0) / 100}</h3>
           <p>Total Donated</p>
         </div>
         <div className="stat-card">
@@ -455,7 +455,7 @@ const DonaterDashboard = () => {
               <div key={donation._id} className="history-card">
                 <div className="history-header">
                   <h3>{donation.requestName || 'Unknown Request'}</h3>
-                  <span className="amount">₨{(donation.amount / 100).toFixed(2)}</span>
+                  <span className="amount">${(donation.amount / 100).toFixed(2)}</span>
                 </div>
                 <div className="history-details">
                   <span>📅 {donation.date ? new Date(donation.date).toLocaleDateString() : 'Date not available'}</span>
