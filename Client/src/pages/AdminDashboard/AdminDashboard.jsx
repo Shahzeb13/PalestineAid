@@ -10,6 +10,17 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [paymentsError, setPaymentsError] = useState('');
+  const [completingPaymentId, setCompletingPaymentId] = useState(null);
+  const [activePaymentsTab, setActivePaymentsTab] = useState('pending');
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+  const [totalPendingAmount, setTotalPendingAmount] = useState(0);
+  const [totalCompletedAmount, setTotalCompletedAmount] = useState(0);
 
   // Show notification
   const showNotification = (message, type = 'success') => {
@@ -84,6 +95,79 @@ const AdminDashboard = () => {
     }
   };
 
+  // Fetch pending admin-to-NGO payments
+  const fetchPendingPayments = async () => {
+    setPaymentsLoading(true);
+    setPaymentsError('');
+    try {
+      const res = await axios.get('http://localhost:5000/api/adminPayment/pending-payments', { withCredentials: true });
+      if (res.data.success) {
+        setPendingPayments(res.data.payments);
+      } else {
+        setPaymentsError(res.data.message || 'Failed to fetch payments');
+      }
+    } catch (err) {
+      setPaymentsError('Failed to fetch payments');
+    } finally {
+      setPaymentsLoading(false);
+    }
+  };
+
+  // Fetch admin payment history
+  const fetchPaymentHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const res = await axios.get('http://localhost:5000/api/adminPayment/payment-history', { withCredentials: true });
+      if (res.data.success) {
+        setPaymentHistory(res.data.payments);
+      } else {
+        setHistoryError(res.data.message || 'Failed to fetch payment history');
+      }
+    } catch (err) {
+      setHistoryError('Failed to fetch payment history');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // Open modal and fetch payments
+  const handleOpenPaymentsModal = () => {
+    setShowPaymentsModal(true);
+    setActivePaymentsTab('pending');
+    fetchPendingPayments();
+    fetchPaymentHistory();
+  };
+
+  // Mark payment as completed
+  const handleCompletePayment = async (donationId) => {
+    setCompletingPaymentId(donationId);
+    try {
+      const res = await axios.post('http://localhost:5000/api/adminPayment/complete-payment', {
+        donationId,
+        paymentMethod: 'bank_transfer', // or allow selection
+      }, { withCredentials: true });
+      if (res.data.success) {
+        showNotification('Payment marked as completed');
+        fetchPendingPayments();
+      } else {
+        showNotification(res.data.message || 'Failed to complete payment', 'error');
+      }
+    } catch (err) {
+      showNotification('Failed to complete payment', 'error');
+    } finally {
+      setCompletingPaymentId(null);
+    }
+  };
+
+  // Update summary stats when payments change
+  useEffect(() => {
+    setTotalPendingAmount(pendingPayments.reduce((sum, p) => sum + (p.amount || 0), 0));
+  }, [pendingPayments]);
+  useEffect(() => {
+    setTotalCompletedAmount(paymentHistory.reduce((sum, p) => sum + (p.amount || 0), 0));
+  }, [paymentHistory]);
+
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -120,6 +204,9 @@ const AdminDashboard = () => {
       <div className="dashboard-header">
         <h1>Admin Dashboard</h1>
         <p>Manage aid requests</p>
+        <button className="btn view" style={{marginTop: '1rem'}} onClick={handleOpenPaymentsModal}>
+          Admin to NGO Payments
+        </button>
       </div>
 
       {/* Statistics */}
@@ -272,6 +359,205 @@ const AdminDashboard = () => {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Admin to NGO Payments Modal */}
+      {showPaymentsModal && (
+        <div className="modal" onClick={() => setShowPaymentsModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: 900}}>
+            <div className="modal-header">
+              <h2>Admin to NGO Payments</h2>
+              <button onClick={() => setShowPaymentsModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              {/* Flashy Summary Section */}
+              <div style={{
+                display: 'flex',
+                gap: 24,
+                marginBottom: 32,
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                alignItems: 'stretch',
+              }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e42 100%)',
+                  color: '#fff',
+                  borderRadius: 16,
+                  padding: '1.5rem 2.5rem',
+                  minWidth: 220,
+                  boxShadow: '0 6px 24px rgba(251,191,36,0.15)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  animation: 'fadeIn 1s',
+                }}>
+                  <span style={{fontSize: 36, marginBottom: 8, filter: 'drop-shadow(0 2px 6px #f59e42)'}}>💸</span>
+                  <span style={{fontSize: 32, fontWeight: 700, letterSpacing: 1}}>{pendingPayments.length}</span>
+                  <span style={{fontSize: 16, fontWeight: 500, opacity: 0.9}}>Pending Payments</span>
+                </div>
+                <div style={{
+                  background: 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
+                  color: '#fff',
+                  borderRadius: 16,
+                  padding: '1.5rem 2.5rem',
+                  minWidth: 220,
+                  boxShadow: '0 6px 24px rgba(52,211,153,0.15)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  animation: 'fadeIn 1.2s',
+                }}>
+                  <span style={{fontSize: 36, marginBottom: 8, filter: 'drop-shadow(0 2px 6px #059669)'}}>💰</span>
+                  <span style={{fontSize: 32, fontWeight: 700, letterSpacing: 1}}>
+                    ${totalPendingAmount.toLocaleString()}
+                  </span>
+                  <span style={{fontSize: 16, fontWeight: 500, opacity: 0.9}}>Total Pending Amount</span>
+                </div>
+                <div style={{
+                  background: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)',
+                  color: '#fff',
+                  borderRadius: 16,
+                  padding: '1.5rem 2.5rem',
+                  minWidth: 220,
+                  boxShadow: '0 6px 24px rgba(99,102,241,0.15)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  animation: 'fadeIn 1.4s',
+                }}>
+                  <span style={{fontSize: 36, marginBottom: 8, filter: 'drop-shadow(0 2px 6px #6366f1)'}}>🎉</span>
+                  <span style={{fontSize: 32, fontWeight: 700, letterSpacing: 1}}>{paymentHistory.length}</span>
+                  <span style={{fontSize: 16, fontWeight: 500, opacity: 0.9}}>Completed Payments</span>
+                </div>
+                <div style={{
+                  background: 'linear-gradient(135deg, #f43f5e 0%, #f87171 100%)',
+                  color: '#fff',
+                  borderRadius: 16,
+                  padding: '1.5rem 2.5rem',
+                  minWidth: 220,
+                  boxShadow: '0 6px 24px rgba(244,63,94,0.15)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  animation: 'fadeIn 1.6s',
+                }}>
+                  <span style={{fontSize: 36, marginBottom: 8, filter: 'drop-shadow(0 2px 6px #f43f5e)'}}>🏆</span>
+                  <span style={{fontSize: 32, fontWeight: 700, letterSpacing: 1}}>
+                    ${totalCompletedAmount.toLocaleString()}
+                  </span>
+                  <span style={{fontSize: 16, fontWeight: 500, opacity: 0.9}}>Total Completed Amount</span>
+                </div>
+              </div>
+              {/* Tabs */}
+              <div style={{display: 'flex', gap: 16, marginBottom: 24}}>
+                <button
+                  className={`btn view${activePaymentsTab === 'pending' ? ' active' : ''}`}
+                  style={{fontWeight: activePaymentsTab === 'pending' ? 'bold' : 'normal'}}
+                  onClick={() => setActivePaymentsTab('pending')}
+                >
+                  Pending Payments
+                </button>
+                <button
+                  className={`btn view${activePaymentsTab === 'history' ? ' active' : ''}`}
+                  style={{fontWeight: activePaymentsTab === 'history' ? 'bold' : 'normal'}}
+                  onClick={() => setActivePaymentsTab('history')}
+                >
+                  Payment History
+                </button>
+              </div>
+              {/* Tab Content */}
+              {activePaymentsTab === 'pending' ? (
+                paymentsLoading ? (
+                  <div className="loading"><div className="spinner"></div><p>Loading payments...</p></div>
+                ) : paymentsError ? (
+                  <div className="error"><p>{paymentsError}</p></div>
+                ) : pendingPayments.length === 0 ? (
+                  <div className="no-requests"><p>No pending payments to NGOs.</p></div>
+                ) : (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{background: '#f3f4f6'}}>
+                          <th style={{padding: '8px'}}>Amount</th>
+                          <th style={{padding: '8px'}}>Currency</th>
+                          <th style={{padding: '8px'}}>Date</th>
+                          <th style={{padding: '8px'}}>Donor</th>
+                          <th style={{padding: '8px'}}>Request</th>
+                          <th style={{padding: '8px'}}>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pendingPayments.map(payment => (
+                          <tr key={payment.id} style={{borderBottom: '1px solid #e5e7eb'}}>
+                            <td style={{padding: '8px'}}>{payment.amount}</td>
+                            <td style={{padding: '8px'}}>{payment.currency}</td>
+                            <td style={{padding: '8px'}}>{new Date(payment.date).toLocaleDateString()}</td>
+                            <td style={{padding: '8px'}}>{payment.donor?.name || 'N/A'}</td>
+                            <td style={{padding: '8px'}}>{payment.request?.requestName || 'N/A'}</td>
+                            <td style={{padding: '8px'}}>
+                              <button 
+                                className="btn approve"
+                                disabled={completingPaymentId === payment.id}
+                                onClick={() => handleCompletePayment(payment.id)}
+                              >
+                                {completingPaymentId === payment.id ? 'Processing...' : 'Mark as Completed'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              ) : (
+                historyLoading ? (
+                  <div className="loading"><div className="spinner"></div><p>Loading payment history...</p></div>
+                ) : historyError ? (
+                  <div className="error"><p>{historyError}</p></div>
+                ) : paymentHistory.length === 0 ? (
+                  <div className="no-requests"><p>No payment history found.</p></div>
+                ) : (
+                  <div style={{overflowX: 'auto'}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse'}}>
+                      <thead>
+                        <tr style={{background: '#f3f4f6'}}>
+                          <th style={{padding: '8px'}}>Amount</th>
+                          <th style={{padding: '8px'}}>Currency</th>
+                          <th style={{padding: '8px'}}>Date</th>
+                          <th style={{padding: '8px'}}>Donor</th>
+                          <th style={{padding: '8px'}}>Request</th>
+                          <th style={{padding: '8px'}}>Payment Method</th>
+                          <th style={{padding: '8px'}}>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paymentHistory.map(payment => (
+                          <tr key={payment.id} style={{borderBottom: '1px solid #e5e7eb'}}>
+                            <td style={{padding: '8px'}}>{payment.amount}</td>
+                            <td style={{padding: '8px'}}>{payment.currency}</td>
+                            <td style={{padding: '8px'}}>{payment.adminPaymentDate ? new Date(payment.adminPaymentDate).toLocaleDateString() : 'N/A'}</td>
+                            <td style={{padding: '8px'}}>{payment.donor?.name || 'N/A'}</td>
+                            <td style={{padding: '8px'}}>{payment.request?.requestName || 'N/A'}</td>
+                            <td style={{padding: '8px'}}>{payment.adminPaymentMethod || 'N/A'}</td>
+                            <td style={{padding: '8px'}}>{payment.adminPaymentNotes || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </div>
       )}

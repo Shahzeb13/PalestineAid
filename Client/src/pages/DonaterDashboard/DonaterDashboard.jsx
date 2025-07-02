@@ -237,6 +237,58 @@ const DonationForm = ({ request, onSuccess, onClose }) => {
   );
 };
 
+// Add a simple progress tracker component
+const DonationTrackerModal = ({ donation, onClose }) => {
+  if (!donation) return null;
+  // Determine phase
+  // Phases: 1) Donor Paid, 2) Admin Received, 3) Admin Forwarded to NGO, 4) NGO Helping in Need
+  const phases = [
+    { label: 'Donor Paid', complete: donation.paymentStatus === 'completed' },
+    { label: 'Admin Received', complete: donation.paymentStatus === 'completed' },
+    { label: 'Admin Forwarded to NGO', complete: donation.adminPaymentStatus === 'completed' },
+    { label: 'NGO Helping in Need', complete: donation.adminPaymentStatus === 'completed' },
+  ];
+  // Find current phase
+  let currentPhase = 0;
+  if (donation.adminPaymentStatus === 'completed') currentPhase = 3;
+  else if (donation.paymentStatus === 'completed') currentPhase = 1;
+  else currentPhase = 0;
+
+  return (
+    <div className="modal" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: 500}}>
+        <div className="modal-header">
+          <h2>Donation Tracking</h2>
+          <button onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          <div style={{marginBottom: 24}}>
+            <strong>Donation ID:</strong> {donation.id}<br/>
+            <strong>Amount:</strong> ${donation.amount}<br/>
+            <strong>Request:</strong> {donation.request?.requestName || 'N/A'}
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            {phases.map((phase, idx) => (
+              <div key={phase.label} style={{display: 'flex', alignItems: 'center', gap: 12}}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: phase.complete ? 'linear-gradient(135deg, #34d399 0%, #059669 100%)' : '#e5e7eb',
+                  color: phase.complete ? '#fff' : '#6b7280',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18,
+                  border: idx === currentPhase ? '3px solid #6366f1' : '2px solid #e5e7eb',
+                  transition: 'all 0.3s',
+                }}>{phase.complete ? '✓' : idx + 1}</div>
+                <span style={{fontWeight: idx === currentPhase ? 700 : 500, color: idx === currentPhase ? '#6366f1' : '#374151'}}>{phase.label}</span>
+                {idx < phases.length - 1 && <div style={{flex: 1, height: 2, background: phase.complete ? 'linear-gradient(90deg, #34d399 0%, #059669 100%)' : '#e5e7eb', marginLeft: 8, marginRight: 8}}></div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DonaterDashboard = () => {
   const { user } = useAuth();
   const [confirmedRequests, setConfirmedRequests] = useState([]);
@@ -247,6 +299,7 @@ const DonaterDashboard = () => {
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [donatingRequest, setDonatingRequest] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+  const [trackingDonation, setTrackingDonation] = useState(null);
 
   // Show notification
   const showNotification = (message, type = 'success') => {
@@ -447,25 +500,26 @@ const DonaterDashboard = () => {
       </div>
 
       {/* Donation History Section */}
-      {donationHistory.length > 0 && (
-        <div className="history-section">
-          <h2>Your Donation History</h2>
-          <div className="history-grid">
-            {donationHistory.map((donation) => (
-              <div key={donation._id} className="history-card">
-                <div className="history-header">
-                  <h3>{donation.requestName || 'Unknown Request'}</h3>
-                  <span className="amount">${(donation.amount / 100).toFixed(2)}</span>
-                </div>
-                <div className="history-details">
-                  <span>📅 {donation.date ? new Date(donation.date).toLocaleDateString() : 'Date not available'}</span>
-                  <span>👤 {donation.receiverName || 'Unknown Receiver'}</span>
-                </div>
+      <div className="history-section">
+        <h2>Your Donation History</h2>
+        <div className="history-grid">
+          {donationHistory.map((donation) => (
+            <div key={donation.id} className="history-card">
+              <div className="history-info">
+                <h3>{donation.request?.requestName || 'Donation'}</h3>
+                <p>Amount: ${donation.amount}</p>
+                <p>Status: {donation.status}</p>
+                <p>Date: {new Date(donation.date).toLocaleDateString()}</p>
               </div>
-            ))}
-          </div>
+              <div className="history-actions">
+                <button className="btn view" onClick={() => setTrackingDonation(donation)}>
+                  Track
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Request Details Modal */}
       {selectedRequest && (
@@ -559,6 +613,11 @@ const DonaterDashboard = () => {
             }}
           />
         </Elements>
+      )}
+
+      {/* Tracking Modal */}
+      {trackingDonation && (
+        <DonationTrackerModal donation={trackingDonation} onClose={() => setTrackingDonation(null)} />
       )}
     </div>
   );

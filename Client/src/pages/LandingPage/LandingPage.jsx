@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
+import NewsWidget from '../../Components/NewsWidget';
+import DonationWidget from '../../Components/DonationWidget';
+import EmergencyResponseWidget from '../../Components/EmergencyResponseWidget';
+import ImpactStoriesWidget from '../../Components/ImpactStoriesWidget';
 
 const LandingPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -62,6 +66,25 @@ const LandingPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Emergency Response Widget */}
+      <EmergencyResponseWidget />
+
+      {/* Track Donation Section */}
+      <div className="track-section" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '40px 0'}}>
+        <Link to="/tracking" className="cta-button primary large" style={{background: 'linear-gradient(135deg, #6366f1 0%, #818cf8 100%)', color: '#fff', fontWeight: 700, fontSize: 20, borderRadius: 12, padding: '18px 36px', boxShadow: '0 4px 16px rgba(99,102,241,0.12)', letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 12}}>
+          <span>🔎 Track Your Donation</span>
+        </Link>
+      </div>
+
+      {/* Impact Stories Widget */}
+      <ImpactStoriesWidget />
+
+      {/* News Widget Section */}
+      <NewsWidget />
+
+      {/* Donation Widget Section */}
+      <DonationWidget />
 
       {/* Live Clock */}
       <div className="live-clock">

@@ -17,9 +17,9 @@ const RecieverDashboard = () => {
     requestDescription: '',
     date: '',
     location: '',
-    urgencyLevel: 'medium',
-    requestType: 'medical',
-    recieverRole: 'individual',
+    urgencyLevel: 'Medium',
+    requestType: 'Medical',
+    recieverRole: 'Individual',
     deadline: '',
     proofImage: ''
   });
@@ -97,9 +97,9 @@ const RecieverDashboard = () => {
           requestDescription: '',
           date: '',
           location: '',
-          urgencyLevel: 'medium',
-          requestType: 'medical',
-          recieverRole: 'individual',
+          urgencyLevel: 'Medium',
+          requestType: 'Medical',
+          recieverRole: 'Individual',
           deadline: '',
           proofImage: ''
         });
@@ -400,10 +400,9 @@ const RecieverDashboard = () => {
                     value={requestForm.urgencyLevel}
                     onChange={(e) => setRequestForm({...requestForm, urgencyLevel: e.target.value})}
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
                   </select>
                 </div>
                 <div className="form-group">
@@ -412,11 +411,22 @@ const RecieverDashboard = () => {
                     value={requestForm.requestType}
                     onChange={(e) => setRequestForm({...requestForm, requestType: e.target.value})}
                   >
-                    <option value="medical">Medical</option>
-                    <option value="food">Food</option>
-                    <option value="shelter">Shelter</option>
-                    <option value="clothing">Clothing</option>
-                    <option value="other">Other</option>
+                    <option value="Medical">Medical</option>
+                    <option value="Food">Food</option>
+                    <option value="Shelter">Shelter</option>
+                    <option value="Clothes">Clothes</option>
+                    <option value="Money">Money</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Receiver Role</label>
+                  <select
+                    value={requestForm.recieverRole}
+                    onChange={(e) => setRequestForm({...requestForm, recieverRole: e.target.value})}
+                  >
+                    <option value="Individual">Individual</option>
+                    <option value="Family">Family</option>
+                    <option value="Organization">Organization</option>
                   </select>
                 </div>
               </div>

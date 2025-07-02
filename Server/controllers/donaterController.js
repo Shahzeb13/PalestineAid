@@ -305,4 +305,80 @@ exports.getDonationHistory = async (req, res) => {
             error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
+};
+
+// Get donation by id for tracking
+exports.getDonationById = async (req, res) => {
+    try {
+        const { donationId } = req.params;
+        const donation = await donaterModel.findById(donationId)
+            .populate("requestId", "requestName requestDescription location urgencyLevel requestType role deadline")
+            .populate("adminId", "name email");
+        if (!donation) {
+            return res.status(404).json({
+                success: false,
+                message: "Donation not found"
+            });
+        }
+        return res.json({
+            success: true,
+            donation: {
+                id: donation._id,
+                amount: donation.amount,
+                currency: donation.currency,
+                message: donation.message,
+                status: donation.status,
+                paymentStatus: donation.paymentStatus,
+                adminPaymentStatus: donation.adminPaymentStatus,
+                date: donation.date,
+                request: donation.requestId,
+                admin: donation.adminId,
+                stripePaymentIntentId: donation.stripePaymentIntentId
+            }
+        });
+    } catch (err) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get donation by id"
+        });
+    }
+};
+
+// Get donations by donor email for tracking
+exports.getDonationsByEmail = async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required" });
+        }
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "No user found with this email" });
+        }
+        const donations = await donaterModel.find({ donaterId: user._id })
+            .populate("requestId", "requestName requestDescription location urgencyLevel requestType role deadline")
+            .populate("adminId", "name email")
+            .sort({ date: -1 });
+        if (!donations.length) {
+            return res.status(404).json({ success: false, message: "No donations found for this email" });
+        }
+        return res.json({
+            success: true,
+            donations: donations.map(donation => ({
+                id: donation._id,
+                amount: donation.amount,
+                currency: donation.currency,
+                message: donation.message,
+                status: donation.status,
+                paymentStatus: donation.paymentStatus,
+                adminPaymentStatus: donation.adminPaymentStatus,
+                date: donation.date,
+                request: donation.requestId,
+                admin: donation.adminId,
+                stripePaymentIntentId: donation.stripePaymentIntentId
+            }))
+        });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: "Failed to get donations by email" });
+    }
 }; 

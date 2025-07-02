@@ -153,6 +153,15 @@ const Navbar = () => {
             <Link to="/about" className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}>
               About
             </Link>
+            <Link to="/volunteer" className={`nav-link ${location.pathname === '/volunteer' ? 'active' : ''}`}>
+              Volunteer
+            </Link>
+            <Link to="/resources" className={`nav-link ${location.pathname === '/resources' ? 'active' : ''}`}>
+              Resources
+            </Link>
+            <Link to="/news" className={`nav-link ${location.pathname === '/news' ? 'active' : ''}`}>
+              News
+            </Link>
             <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>
               Contact
             </Link>
