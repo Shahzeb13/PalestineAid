@@ -1,0 +1,68 @@
+.superadmin-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.superadmin-container .max-w-md {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+  padding: 2rem 2rem 1.5rem 2rem;
+}
+
+.superadmin-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #111;
+}
+
+.superadmin-container input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fafbfc;
+  color: #222;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.superadmin-container input:focus {
+  border-color: #111;
+}
+
+.superadmin-container button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.superadmin-container button:hover,
+.superadmin-container button:focus {
+  background: #222;
+}
+
+.superadmin-container .text-red-600 {
+  color: #e53935;
+  margin-bottom: 0.5rem;
+}
+
+.superadmin-container .text-green-600 {
+  color: #43a047;
+  margin-bottom: 0.5rem;
+} 

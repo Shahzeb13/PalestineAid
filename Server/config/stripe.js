@@ -4,7 +4,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const createDonationPaymentIntent = async (amount, currency = 'usd', metadata = {}) => {
     try {
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(amount * 100), // Convert to cents
+            amount: Math.round(amount), // Amount is already in cents from frontend
             currency: currency.toLowerCase(),
             automatic_payment_methods: {
                 enabled: true,

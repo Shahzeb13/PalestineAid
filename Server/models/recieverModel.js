@@ -15,7 +15,7 @@ const recieverDashboardSchema = new mongoose.Schema({
         enum : ["Confirmed" , "Pending" , "Rejected"],
         default : "Pending"
     },
-    proofImage : {type:String  , required: true},   
+    proofImage : {type:String  , required: false, default: "https://via.placeholder.com/400x300?text=No+Image+Provided"},   
     
 
 })

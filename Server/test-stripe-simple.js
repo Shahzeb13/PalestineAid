@@ -1,20 +1,25 @@
 require('dotenv').config();
-const { createPaymentIntent } = require('./config/stripe');
+const { createDonationPaymentIntent } = require('./config/stripe');
 
 async function testStripe() {
     try {
-        console.log('Testing simple Stripe integration...');
+        console.log('Testing Stripe configuration...');
+        console.log('STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
         
-        const paymentIntent = await createPaymentIntent(10.00, 'usd');
+        const paymentIntent = await createDonationPaymentIntent(1000, 'usd', {
+            donorName: 'Test Donor',
+            requestName: 'Test Request'
+        });
         
-        console.log('✅ Payment intent created!');
-        console.log('ID:', paymentIntent.id);
-        console.log('Client Secret:', paymentIntent.client_secret);
-        console.log('Amount: $', paymentIntent.amount / 100);
+        console.log('Payment intent created successfully:', {
+            id: paymentIntent.id,
+            amount: paymentIntent.amount,
+            currency: paymentIntent.currency,
+            client_secret: paymentIntent.client_secret ? 'EXISTS' : 'MISSING'
+        });
         
     } catch (error) {
-        console.error('❌ Error:', error.message);
-        console.log('💡 Make sure STRIPE_SECRET_KEY is set in your .env file');
+        console.error('Stripe test failed:', error.message);
     }
 }
 

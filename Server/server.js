@@ -23,7 +23,7 @@ app.use(cors({
 
 app.use('/api/auth' , loginRouter)
 app.use('/api/user' , userRouter)
-app.use('/api/recieverRequest' , recieverDashboardRouter)///api/recieverRequest/
+app.use('/api/recieverDashboard' , recieverDashboardRouter)///api/recieverRequest/getRecieverDashboardData
 app.use('/api/adminDashboard' , adminDashboardRouter)
 app.use('/api/donater' , donaterRouter)
 app.use('/api/stripe' , stripeRouter)

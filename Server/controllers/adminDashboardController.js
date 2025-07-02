@@ -7,36 +7,38 @@ const recieverModel = require("../models/recieverModel")
 //--------------------------Get All the requests---------------------------------
 
 exports.getAllRequests = async(req , res ) => {
- 
-
-
     try{
-        const {userId , role} = req.body;
+        // Get userId and role from authenticated user (from JWT token)
+        const userId = req.user.id;
+        const role = req.user.role;
+        
+        console.log('Admin getAllRequests - userId:', userId, 'role:', role);
     
-    if(!userId && !role){
-        return res.json({success : false , message: "Required details missing"})
-    }
+        if(!userId || !role){
+            return res.status(400).json({success : false , message: "Authentication required"})
+        }
     
-    const user =await userModel.findOne({_id :userId});
-    if(!user){
-        return res.json({success: false , message: "User not found"});
+        const user = await userModel.findOne({_id :userId});
+        if(!user){
+            return res.status(404).json({success: false , message: "User not found"});
+        }
 
-    }
+        console.log('Found user:', user.email, 'with role:', user.role);
 
-    if(user.role !== role || role !== "admin"){
-        return res.json({success: false , message: "User is not an admin"})
-    }
+        if(user.role !== role || role !== "admin"){
+            return res.status(403).json({success: false , message: "User is not an admin"})
+        }
 
-    const requests = await recieverModel
-    .find()
-    .populate("recieverId", "name email role");
+        const requests = await recieverModel
+        .find()
+        .populate("recieverId", "name email role");
 
-    
+        console.log('Found requests:', requests.length);
 
-    return res.status(200).json({success: true , message : "All Reciever request Retrieved Successfully" ,
-        Total: requests.length,
-        requests
-    })
+        return res.status(200).json({success: true , message : "All Reciever request Retrieved Successfully" ,
+            Total: requests.length,
+            requests
+        })
     }
     catch (err){
         console.error("Admin Requests fetch error" , {
@@ -51,7 +53,6 @@ exports.getAllRequests = async(req , res ) => {
             error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
-
 }
 
 //-------------------------Get a Single Request---------------------------------
@@ -84,56 +85,17 @@ exports.getSingleRequestDetails =async (req , res) => {
             error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
-        
-
-
-
 }
-
-
 
 //--------------------------Handle Approval------------------------------------
-exports.ApproveUserRequest = async(req , res) => {
-
-    try{
-
-        const requestId = req.user.requestId;
-
-
-        if(!requestId){
-            return res.json({success : false  , message: "requestId is empty"})
-        }
-
-
-        const request = await recieverModel.findById(requestId);
-         
-       
-
-
-
-
-    }
-
-    catch(err){
-        console.error(
-            
-            {
-                message : err.message,
-                body:req.body,
-                stack: err.stack
-     } )
-     return res.json({
-        success : false,
-        messsage: "Internal Server Error! Try Again later",
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
-     })
-    }
-}
-
 exports.approveUserRequest = async (req, res) => {
     try {
-        const { userId, role,  action } = req.body; // action: "approve" or "reject"
+        // Get userId and role from authenticated user (from JWT token)
+        const userId = req.user.id;
+        const role = req.user.role;
+        const { action } = req.body; // action: "approve" or "reject"
         const requestId = req.params.requestId;
+        
         // Validate required fields
         if (!userId || !role || !requestId || !action) {
             return res.status(400).json({
@@ -150,8 +112,6 @@ exports.approveUserRequest = async (req, res) => {
             });
         }
         
-        
-
         // Check if user is admin
         const admin = await userModel.findById(userId);
         if (!admin) {

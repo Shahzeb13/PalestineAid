@@ -39,9 +39,34 @@ exports.handleRecieverRequest = async (req , res) => {
           if (
             !recieverId || !requestName?.trim() || !requestDescription?.trim() ||
             !date || !location?.trim() || !urgencyLevel || !requestType ||
-            !recieverRole || !deadline || !proofImage?.trim()
+            !recieverRole || !deadline
           ) {
             return res.status(400).json({ success: false, message: "All fields are required" });
+          }
+          
+          // Make proofImage optional or provide a default
+          const imageUrl = proofImage?.trim() || "https://via.placeholder.com/400x300?text=No+Image+Provided";
+          
+          // Normalize enum values to match backend expectations
+          const normalizedUrgencyLevel = urgencyLevel?.charAt(0).toUpperCase() + urgencyLevel?.slice(1).toLowerCase();
+          const normalizedRequestType = requestType?.charAt(0).toUpperCase() + requestType?.slice(1).toLowerCase();
+          const normalizedRecieverRole = recieverRole?.charAt(0).toUpperCase() + recieverRole?.slice(1).toLowerCase();
+          
+          // Validate enum values
+          const validUrgencyLevels = ["Low", "Medium", "High"];
+          const validRequestTypes = ["Money", "Food", "Clothes", "Shelter", "Medical"];
+          const validRecieverRoles = ["Individual", "Family", "Organization"];
+          
+          if (!validUrgencyLevels.includes(normalizedUrgencyLevel)) {
+            return res.status(400).json({ success: false, message: "Invalid urgency level. Must be Low, Medium, or High" });
+          }
+          
+          if (!validRequestTypes.includes(normalizedRequestType)) {
+            return res.status(400).json({ success: false, message: "Invalid request type. Must be Money, Food, Clothes, Shelter, or Medical" });
+          }
+          
+          if (!validRecieverRoles.includes(normalizedRecieverRole)) {
+            return res.status(400).json({ success: false, message: "Invalid receiver role. Must be Individual, Family, or Organization" });
           }
           
         // Create request without status - it will default to "Pending"
@@ -51,11 +76,11 @@ exports.handleRecieverRequest = async (req , res) => {
             requestDescription, 
             date, 
             location, 
-            urgencyLevel, 
-            requestType, 
-            recieverRole, 
+            urgencyLevel: normalizedUrgencyLevel, 
+            requestType: normalizedRequestType, 
+            recieverRole: normalizedRecieverRole, 
             deadline, 
-            proofImage
+            proofImage: imageUrl
         });
 
         try {
@@ -131,6 +156,11 @@ exports.handleRecieverRequest = async (req , res) => {
         });
 
     } catch (error) {
+        console.error('Receiver request creation failed:', {
+            message: error.message,
+            stack: error.stack,
+            body: req.body
+        });
         return res.status(500).json({success: false, message: error.message})
     }
 }

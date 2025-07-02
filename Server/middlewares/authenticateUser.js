@@ -18,9 +18,13 @@ exports.authenticateUser = (req, res, next) => {
         const userRole = decodedToken.role;
         
         // Set user info in req.user for consistency
-        req.user = { id: decodedToken.id };
+        req.user = { 
+            id: decodedToken.id,
+            role: userRole
+        };
         
         // Also set userId in req.body for backward compatibility with OTP functions
+        if (!req.body) req.body = {};
         req.body.userId = decodedToken.id;
         req.body.role = userRole;
         
