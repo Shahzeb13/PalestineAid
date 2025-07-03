@@ -3,25 +3,25 @@ import React from 'react';
 const news = [
   {
     title: "Gaza: Humanitarian Crisis Deepens",
-    image: "https://images.theconversation.com/files/586146/original/file-20240404-17-qhh5n.jpg?ixlib=rb-4.1.0&rect=0%2C91%2C3402%2C2164&q=20&auto=format&w=320&fit=clip&dpr=2&usm=12&cs=strip",
+    image: "/Client/Images/background.png",
     summary: "Ongoing conflict has left thousands in urgent need of food, water, and medical aid. International organizations call for immediate action.",
     link: "https://www.aljazeera.com/news/2024/6/30/gaza-humanitarian-crisis-deepens"
   },
   {
     title: "Children in Gaza: The Lost Generation",
-    image: "https://cloudfront-us-east-1.images.arcpublishing.com/opb/Z7TL7SGR65CUFP767XY74LBNCU.jpg",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
     summary: "With schools destroyed and families displaced, Gaza's children face an uncertain future. Relief efforts are underway, but more support is needed.",
     link: "https://www.unicef.org/press-releases/gaza-children-lost-generation"
   },
   {
     title: "Aid Convoys Face Blockades",
-    image: "https://media.gettyimages.com/id/2157690599/photo/gaza-city-gaza-aid-trucks-of-the-united-nations-relief-and-works-agency-for-palestinian.jpg?s=612x612&w=gi&k=20&c=a56TkFk5KlDVVV-m-nwQ3ysX2D_CE3gDJJYIR1PdIKU=",
+    image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
     summary: "Humanitarian convoys struggle to reach those in need as border restrictions tighten. Calls for safe passage grow louder.",
     link: "https://www.bbc.com/news/world-middle-east-68712345"
   },
   {
     title: "Global Solidarity for Gaza",
-    image: "https://www.worldvision.org.uk/media/equd1evg/flags-outside-the-un-building-in-genevea.jpg",
+    image: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
     summary: "People around the world unite in support of Gaza, organizing rallies, fundraisers, and awareness campaigns.",
     link: "https://www.theguardian.com/world/2024/jun/30/global-solidarity-gaza"
   },
@@ -39,15 +39,9 @@ const news = [
   },
   {
     title: "Clean Water Efforts Intensify",
-    image: "https://images.theconversation.com/files/477989/original/file-20220808-20-hajau1.jpg?ixlib=rb-4.1.0&q=20&auto=format&w=320&fit=clip&dpr=2&usm=12&cs=strip",
+    image: "https://images.unsplash.com/photo-1465101178521-c1a9136a3fd8?auto=format&fit=crop&w=600&q=80",
     summary: "NGOs and local groups are working to provide clean water to families in Gaza as infrastructure damage worsens.",
     link: "https://www.reuters.com/world/middle-east/gaza-water-crisis-2024-06-30/"
-  },
-  {
-    title: "WHO Responds to Gaza Health Crisis",
-    image: "https://global.unitednations.entermediadb.net/assets/mediadb/services/module/asset/downloads/preset/Libraries/Production%20Library/17-11-2023-WHO-Gaza.jpg/image1170x530cropped.jpg",
-    summary: "The World Health Organization is coordinating emergency medical response efforts in Gaza, providing critical healthcare support and supplies to affected communities.",
-    link: "https://www.who.int/news-room/feature-stories/detail/who-response-gaza-health-crisis"
   },
   {
     title: "Artists Share Stories of Resilience",

@@ -4,7 +4,7 @@ const userModel = require('../models/userModel');
 // Get all donations that admin needs to pay to NGO
 exports.getPendingAdminPayments = async (req, res) => {
     try {
-        const { userId } = req.body; // From middleware
+        const userId = req.user.id; // Use userId from req.user
 
         // Validate if user is an admin
         const admin = await userModel.findById(userId);
@@ -54,7 +54,7 @@ exports.getPendingAdminPayments = async (req, res) => {
 // Mark admin payment as completed (admin paid NGO)
 exports.completeAdminPayment = async (req, res) => {
     try {
-        const { userId } = req.body; // From middleware
+        const userId = req.user.id; // Use userId from req.user
         const { donationId, paymentMethod, notes } = req.body;
 
         // Validate if user is an admin
@@ -124,7 +124,7 @@ exports.completeAdminPayment = async (req, res) => {
 // Get admin payment history
 exports.getAdminPaymentHistory = async (req, res) => {
     try {
-        const { userId } = req.body; // From middleware
+        const userId = req.user.id; // Use userId from req.user
 
         // Validate if user is an admin
         const admin = await userModel.findById(userId);

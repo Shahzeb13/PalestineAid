@@ -59,25 +59,35 @@ const ImpactStoriesWidget = () => {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-      borderRadius: 20,
-      padding: 32,
-      margin: '40px auto',
-      maxWidth: 1200,
-      boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)'
+      background: 'linear-gradient(120deg, #1e40af 60%, #3b82f6 100%)',
+      borderRadius: 32,
+      padding: '3.5rem 3rem 2.5rem 3rem',
+      maxWidth: 1600,
+      width: '100%',
+      margin: '0 auto 40px auto',
+      boxShadow: '0 8px 32px rgba(59,130,246,0.18)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'all 0.3s',
     }}>
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>💙</div>
-        <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 32, marginBottom: 8 }}>Stories of Impact</h2>
-        <p style={{ color: '#fff', fontSize: 18, opacity: 0.9 }}>Real stories of hope, resilience, and transformation</p>
+        <h2 style={{ color: '#fff', fontWeight: 800, fontSize: 32, marginBottom: 8, textAlign: 'center' }}>Stories of Impact</h2>
+        <p style={{ color: '#fff', fontSize: 18, opacity: 0.9, textAlign: 'center' }}>Real stories of hope, resilience, and transformation</p>
       </div>
 
       {/* Impact Statistics */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 20,
-        marginBottom: 40
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '2.5rem',
+        marginBottom: '2.2rem',
+        flexWrap: 'wrap',
+        marginTop: '2.5rem',
       }}>
         {stats.map((stat, index) => (
           <div key={index} style={{
@@ -198,27 +208,38 @@ const ImpactStoriesWidget = () => {
           <button style={{
             background: '#fff',
             color: '#1e40af',
-            border: 'none',
-            borderRadius: 12,
-            padding: '16px 32px',
-            fontWeight: 700,
+            borderRadius: 50,
+            padding: '0.9rem 2rem',
+            fontWeight: 800,
             fontSize: 16,
-            cursor: 'pointer',
-            boxShadow: '0 4px 16px rgba(255,255,255,0.2)'
+            textDecoration: 'none',
+            boxShadow: '0 4px 16px rgba(30,64,175,0.10)',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            letterSpacing: 1,
+            textShadow: '0 1px 2px rgba(0,0,0,0.10)'
           }}>
-            💝 Make a Difference
+            Make a Difference
           </button>
           <button style={{
-            background: 'rgba(255,255,255,0.2)',
-            color: '#fff',
-            border: '2px solid rgba(255,255,255,0.3)',
-            borderRadius: 12,
-            padding: '16px 32px',
-            fontWeight: 700,
+            background: '#fff',
+            color: '#1e40af',
+            borderRadius: 50,
+            padding: '0.9rem 2rem',
+            fontWeight: 800,
             fontSize: 16,
-            cursor: 'pointer'
+            textDecoration: 'none',
+            boxShadow: '0 4px 16px rgba(30,64,175,0.10)',
+            transition: 'all 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            letterSpacing: 1,
+            textShadow: '0 1px 2px rgba(0,0,0,0.10)'
           }}>
-            📖 Read More Stories
+            Read More Stories
           </button>
         </div>
       </div>

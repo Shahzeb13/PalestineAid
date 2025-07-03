@@ -29,11 +29,23 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <div className="hero-section">
-        <div className="hero-content">
+        <div className="hero-card">
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '18px' }}>
+            <img
+              src="https://img.freepik.com/premium-vector/palestine-support-logo-icon-design-vector-illustration_757387-5020.jpg"
+              alt="Palestine Aid Logo"
+              className="hero-logo"
+              style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
+            />
+          </div>
           <div className="hero-text">
+            <div className="hero-tagline" style={{ color: '#009736' }}>United for Humanity & Hope</div>
             <h1 className="hero-title">
-              <span className="title-line">Palestine</span>
-              <span className="title-accent">Aid</span>
+            <span style={{ color: '#000', fontWeight: 'bold' }}>Nusrah</span>
+              <span className="title-line" style={{ color: '#009736', fontWeight: 'bold' }}>Pal</span>
+              <span className="title-line" style={{ color: '#000', fontWeight: 'bold' }}>est</span>
+              <span className="title-accent" style={{ color: '#ce1126', fontWeight: 'bold' }}>ine</span>
+             
             </h1>
             <p className="hero-subtitle">
               Supporting humanitarian efforts and providing aid to those in need
@@ -53,7 +65,6 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-          
           <div className="hero-actions">
             <Link to="/register" className="cta-button primary">
               <span>Get Started</span>
@@ -68,7 +79,9 @@ const LandingPage = () => {
       </div>
 
       {/* Emergency Response Widget */}
-      <EmergencyResponseWidget />
+      <div className="section-spacing">
+        <EmergencyResponseWidget />
+      </div>
 
       {/* Track Donation Section */}
       <div className="track-section" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '40px 0'}}>
@@ -78,8 +91,46 @@ const LandingPage = () => {
       </div>
 
       {/* Impact Stories Widget */}
-      <ImpactStoriesWidget />
+      <div className="section-spacing">
+        <ImpactStoriesWidget />
+      </div>
 
+      {/* News Section (Custom Heading and Description) */}
+      <div className="custom-news-section" style={{
+        width: '100%',
+        maxWidth: 1400,
+        margin: '0 auto 32px auto',
+        padding: '32px 0 8px 0',
+        textAlign: 'center',
+        background: 'linear-gradient(90deg, #18181b 60%, #232526 100%)',
+        borderRadius: 24,
+        boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+        color: '#fff',
+        position: 'relative',
+      }}>
+        <h2 style={{
+          color: '#ce1126',
+          fontWeight: 900,
+          fontSize: 38,
+          margin: 0,
+          letterSpacing: 1,
+          textAlign: 'center',
+          textShadow: '0 2px 8px rgba(0,0,0,0.18)'
+        }}>Gaza News & Current Affairs</h2>
+        <p style={{
+          fontSize: 20,
+          margin: '18px auto 0 auto',
+          maxWidth: 900,
+          color: '#f3f4f6',
+          fontWeight: 400,
+          lineHeight: 1.5,
+          textAlign: 'center',
+          textShadow: '0 1px 4px rgba(0,0,0,0.10)'
+        }}>
+          Stay informed. Stay inspired. Make a difference.<br/>
+          <span style={{fontWeight:600, color:'#fff'}}>Get the latest updates, stories, and urgent calls for support from Gaza. Your awareness and action can help save lives and bring hope to those in need.</span>
+        </p>
+      </div>
       {/* News Widget Section */}
       <NewsWidget />
 
@@ -96,24 +147,28 @@ const LandingPage = () => {
 
       {/* Mission Statement */}
       <div className="mission-section">
-        <div className="mission-content">
-          <h2>Our Mission</h2>
-          <p>
-            To provide immediate humanitarian assistance and support to communities in need, 
-            ensuring that aid reaches those who need it most through transparent and efficient processes.
-          </p>
-          <div className="mission-features">
-            <div className="feature">
-              <span className="feature-icon">⚡</span>
-              <span>Quick Response</span>
+        <h2 className="mission-title">Our Mission</h2>
+        <div className="mission-content mission-flex">
+          <div className="mission-row">
+            <div className="mission-features-col">
+              <div className="feature">
+                <span className="feature-icon">⚡</span>
+                <span>Quick Response</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🔒</span>
+                <span>Secure Platform</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🌱</span>
+                <span>Sustainable Impact</span>
+              </div>
             </div>
-            <div className="feature">
-              <span className="feature-icon">🔒</span>
-              <span>Secure Platform</span>
-            </div>
-            <div className="feature">
-              <span className="feature-icon">🌱</span>
-              <span>Sustainable Impact</span>
+            <div className="mission-paragraph-col">
+              <p>
+                To provide immediate humanitarian assistance and support to communities in need, 
+                ensuring that aid reaches those who need it most through transparent and efficient processes.
+              </p>
             </div>
           </div>
         </div>

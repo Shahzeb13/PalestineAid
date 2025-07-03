@@ -69,7 +69,7 @@ const Register = () => {
           <div className="form-group">
             <label htmlFor="name">Full Name</label>
             <div className="input-wrapper">
-              <span className="input-icon">👤</span>
+              <span className="input-icon" style={{display:'none'}}>👤</span>
               <input
                 id="name"
                 name="name"
@@ -86,7 +86,7 @@ const Register = () => {
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <div className="input-wrapper">
-              <span className="input-icon">📧</span>
+              <span className="input-icon" style={{display:'none'}}>📧</span>
               <input
                 id="email"
                 name="email"
@@ -103,7 +103,7 @@ const Register = () => {
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <div className="input-wrapper">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon" style={{display:'none'}}>🔒</span>
               <input
                 id="password"
                 name="password"
@@ -120,7 +120,7 @@ const Register = () => {
           <div className="form-group">
             <label htmlFor="role">I want to</label>
             <div className="input-wrapper">
-              <span className="input-icon">🎯</span>
+              <span className="input-icon" style={{display:'none'}}>🎯</span>
               <select
                 id="role"
                 name="role"

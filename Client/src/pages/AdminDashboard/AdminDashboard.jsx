@@ -21,6 +21,10 @@ const AdminDashboard = () => {
   const [historyError, setHistoryError] = useState('');
   const [totalPendingAmount, setTotalPendingAmount] = useState(0);
   const [totalCompletedAmount, setTotalCompletedAmount] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('bank_transfer');
+  const [paymentNotes, setPaymentNotes] = useState('');
 
   // Show notification
   const showNotification = (message, type = 'success') => {
@@ -100,7 +104,7 @@ const AdminDashboard = () => {
     setPaymentsLoading(true);
     setPaymentsError('');
     try {
-      const res = await axios.get('http://localhost:5000/api/adminPayment/pending-payments', { withCredentials: true });
+      const res = await axios.get('http://localhost:5000/api/admin-payments/pending-payments', { withCredentials: true });
       if (res.data.success) {
         setPendingPayments(res.data.payments);
       } else {
@@ -118,7 +122,7 @@ const AdminDashboard = () => {
     setHistoryLoading(true);
     setHistoryError('');
     try {
-      const res = await axios.get('http://localhost:5000/api/adminPayment/payment-history', { withCredentials: true });
+      const res = await axios.get('http://localhost:5000/api/admin-payments/payment-history', { withCredentials: true });
       if (res.data.success) {
         setPaymentHistory(res.data.payments);
       } else {
@@ -139,17 +143,30 @@ const AdminDashboard = () => {
     fetchPaymentHistory();
   };
 
-  // Mark payment as completed
-  const handleCompletePayment = async (donationId) => {
-    setCompletingPaymentId(donationId);
+  // Open payment modal for a specific payment
+  const openPaymentModal = (payment) => {
+    setSelectedPayment(payment);
+    setPaymentMethod('bank_transfer');
+    setPaymentNotes('');
+    setShowPaymentModal(true);
+  };
+
+  // Confirm send to NGO
+  const confirmSendToNGO = async () => {
+    if (!selectedPayment) return;
+    setCompletingPaymentId(selectedPayment.id);
     try {
-      const res = await axios.post('http://localhost:5000/api/adminPayment/complete-payment', {
-        donationId,
-        paymentMethod: 'bank_transfer', // or allow selection
+      const res = await axios.post('http://localhost:5000/api/admin-payments/complete-payment', {
+        donationId: selectedPayment.id,
+        paymentMethod,
+        notes: paymentNotes,
       }, { withCredentials: true });
       if (res.data.success) {
-        showNotification('Payment marked as completed');
+        showNotification('Payment sent to NGO');
         fetchPendingPayments();
+        fetchPaymentHistory();
+        setShowPaymentModal(false);
+        setSelectedPayment(null);
       } else {
         showNotification(res.data.message || 'Failed to complete payment', 'error');
       }
@@ -507,10 +524,9 @@ const AdminDashboard = () => {
                             <td style={{padding: '8px'}}>
                               <button 
                                 className="btn approve"
-                                disabled={completingPaymentId === payment.id}
-                                onClick={() => handleCompletePayment(payment.id)}
+                                onClick={() => openPaymentModal(payment)}
                               >
-                                {completingPaymentId === payment.id ? 'Processing...' : 'Mark as Completed'}
+                                Send to NGO
                               </button>
                             </td>
                           </tr>
@@ -557,6 +573,38 @@ const AdminDashboard = () => {
                   </div>
                 )
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPaymentModal && (
+        <div className="modal" onClick={() => setShowPaymentModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: 400}}>
+            <div className="modal-header">
+              <h3>Send Payment to NGO</h3>
+              <button onClick={() => setShowPaymentModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div style={{marginBottom: 16}}>
+                <label style={{fontWeight: 600}}>Payment Method:</label>
+                <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} style={{width: '100%', padding: 8, marginTop: 4}}>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="cash">Cash</option>
+                  <option value="cheque">Cheque</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div style={{marginBottom: 16}}>
+                <label style={{fontWeight: 600}}>Notes (optional):</label>
+                <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} style={{width: '100%', padding: 8, minHeight: 60, marginTop: 4}} placeholder="Add any notes about this payment..." />
+              </div>
+              <div style={{display: 'flex', justifyContent: 'flex-end', gap: 12}}>
+                <button className="btn" onClick={() => setShowPaymentModal(false)}>Cancel</button>
+                <button className="btn approve" onClick={confirmSendToNGO} disabled={completingPaymentId === (selectedPayment && selectedPayment.id)}>
+                  {completingPaymentId === (selectedPayment && selectedPayment.id) ? 'Processing...' : 'Confirm Send'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

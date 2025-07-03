@@ -75,7 +75,22 @@ const DonationWidget = () => {
   }
 
   return (
-    <div style={{background: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)', borderRadius: 18, boxShadow: '0 4px 24px rgba(244,63,94,0.15)', padding: 32, maxWidth: 500, margin: '0 auto', marginTop: 32}}>
+    <div style={{
+      background: 'linear-gradient(120deg, #f43f5e 60%, #e11d48 100%)',
+      borderRadius: 32,
+      padding: '3.5rem 3rem 2.5rem 3rem',
+      maxWidth: 900,
+      width: '100%',
+      margin: '0 auto 40px auto',
+      boxShadow: '0 8px 32px rgba(244,63,94,0.18)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'all 0.3s',
+    }}>
       <div style={{textAlign: 'center', marginBottom: 24}}>
         <div style={{fontSize: 48, marginBottom: 16}}>💝</div>
         <h2 style={{color: '#fff', fontWeight: 800, fontSize: 28, marginBottom: 8}}>Make a Difference Today</h2>
@@ -152,7 +167,6 @@ const DonationWidget = () => {
           )}
         </button>
       </form>
-      
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
@@ -163,4 +177,4 @@ const DonationWidget = () => {
   );
 };
 
-export default DonationWidget; 
+export default DonationWidget;

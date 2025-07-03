@@ -1,6 +1,6 @@
 const express = require('express');
 const donaterRouter = express.Router();
-const { getConfirmedRequests, getRequestDetails, getDonationHistory, getDonationById, getDonationsByEmail } = require("../controllers/donaterController");
+const { getConfirmedRequests, getRequestDetails, getDonationHistory, getDonationById, getDonationsByEmail, markDonationAsPaid } = require("../controllers/donaterController");
 const { authenticateUser } = require("../middlewares/authenticateUser.js");
 
 donaterRouter.get("/confirmedRequests", authenticateUser, getConfirmedRequests);
@@ -8,6 +8,7 @@ donaterRouter.get("/request/:requestId", authenticateUser, getRequestDetails);
 donaterRouter.get("/donationHistory", authenticateUser, getDonationHistory);
 donaterRouter.get("/donation/:donationId", getDonationById);
 donaterRouter.get("/donations-by-email", getDonationsByEmail);
+donaterRouter.post("/mark-donation-paid", markDonationAsPaid);
 
 module.exports = donaterRouter; 
 

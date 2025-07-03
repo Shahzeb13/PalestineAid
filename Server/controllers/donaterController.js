@@ -445,4 +445,42 @@ exports.getDonationsByEmail = async (req, res) => {
             error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
     }
+};
+
+// Mark donation as paid after payment confirmation
+exports.markDonationAsPaid = async (req, res) => {
+    try {
+        const { donationId } = req.body;
+        if (!donationId) {
+            return res.status(400).json({
+                success: false,
+                message: "Donation ID is required"
+            });
+        }
+        const donation = await donaterModel.findById(donationId);
+        if (!donation) {
+            return res.status(404).json({
+                success: false,
+                message: "Donation not found"
+            });
+        }
+        donation.paymentStatus = "completed";
+        donation.status = "Donated";
+        await donation.save();
+        return res.json({
+            success: true,
+            message: "Donation marked as paid",
+            donation: {
+                id: donation._id,
+                paymentStatus: donation.paymentStatus,
+                status: donation.status
+            }
+        });
+    } catch (err) {
+        console.error("Mark donation as paid error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to mark donation as paid"
+        });
+    }
 }; 
