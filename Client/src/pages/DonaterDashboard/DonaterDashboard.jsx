@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './DonaterDashboard.css';
+import ChatbotToggle from '../../Components/chatbot/ChatbotToggle';
 
 // Load Stripe (you'll need to add your publishable key)
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_key_here');
@@ -619,6 +620,9 @@ const DonaterDashboard = () => {
       {trackingDonation && (
         <DonationTrackerModal donation={trackingDonation} onClose={() => setTrackingDonation(null)} />
       )}
+
+      {/* Chatbot */}
+      <ChatbotToggle />
     </div>
   );
 };

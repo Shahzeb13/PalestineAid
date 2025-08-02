@@ -5,6 +5,7 @@ import NewsWidget from '../../Components/NewsWidget';
 import DonationWidget from '../../Components/DonationWidget';
 import EmergencyResponseWidget from '../../Components/EmergencyResponseWidget';
 import ImpactStoriesWidget from '../../Components/ImpactStoriesWidget';
+import ChatbotToggle from '../../Components/chatbot/ChatbotToggle';
 
 const LandingPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -189,6 +190,9 @@ const LandingPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Chatbot */}
+      <ChatbotToggle />
     </div>
   );
 };

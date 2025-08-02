@@ -9,6 +9,7 @@ const donaterRouter = require("./routes/donaterRoutes.js")
 const stripeRouter = require("./routes/stripeRoutes.js")
 const adminPaymentRouter = require("./routes/adminPaymentRoutes.js")
 const donationIntentRouter = require("./routes/donationIntentRoutes.js")
+const chatbotRouter = require("./routes/chatbotRouter.js")
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
@@ -30,6 +31,7 @@ app.use('/api/donater' , donaterRouter)
 app.use('/api/stripe' , stripeRouter)
 app.use('/api/admin-payments' , adminPaymentRouter)
 app.use('/api/donation-intent' , donationIntentRouter)
+app.use('/api/chat' , chatbotRouter)
 app.get('/' , (req , res) => {
     res.send('<h2>Welcome to the Home</h2>')
 })

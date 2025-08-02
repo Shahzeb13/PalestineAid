@@ -20,6 +20,7 @@ import Resources from './pages/Resources/Resources';
 import EmergencyDonate from './pages/EmergencyDonate/EmergencyDonate';
 import EmergencyContact from './pages/EmergencyContact/EmergencyContact';
 
+
 const App = () => {
   return (
     <AuthProvider>
@@ -52,6 +53,8 @@ const App = () => {
         </div>
       </Router>
     </AuthProvider>
+    
+    
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import './AdminDashboard.css';
+import ChatbotToggle from '../../Components/chatbot/ChatbotToggle';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -609,6 +610,9 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Chatbot */}
+      <ChatbotToggle />
     </div>
   );
 };

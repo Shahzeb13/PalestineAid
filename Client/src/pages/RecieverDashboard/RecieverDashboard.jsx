@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './RecieverDashboard.css';
+import ChatbotToggle from '../../Components/chatbot/ChatbotToggle';
 
 const RecieverDashboard = () => {
   const [userId, setUserId] = useState(null);
@@ -536,6 +537,9 @@ const RecieverDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Chatbot */}
+      <ChatbotToggle />
     </div>
   );
 };
